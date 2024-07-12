@@ -41,6 +41,14 @@ ProjectFK/.vs/
 *.VC.db
 *.VC.opendb
 
+# Assets
+ProjectFK/Content/InfinityBladeIceLands
+ProjectFK/Content/ParagonGideon
+ProjectFK/Content/ParagonGreystone
+ProjectFK/Content/ParagonGrux
+ProjectFK/Content/ParagonKwang
+ProjectFK/Content/ParagonSevarog
+
 # Precompiled Assets
 ProjectFK/SourceArt/**/*.png
 ProjectFK/SourceArt/**/*.tga
