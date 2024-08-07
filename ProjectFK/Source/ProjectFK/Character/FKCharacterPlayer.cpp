@@ -56,6 +56,11 @@ void AFKCharacterPlayer::BeginPlay()
 	SetCharacterControl(CurrentCharacterControlType);
 }
 
+void AFKCharacterPlayer::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+}
+
 void AFKCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -68,6 +73,11 @@ void AFKCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 void AFKCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterControlType)
 {
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+
 	UFKCharacterControlData* NewCharacterControl = CharacterControlManager[NewCharacterControlType];
 	check(NewCharacterControl);
 

@@ -30,7 +30,7 @@ void AFKMenuPlayerController::BeginPlay()
 
 void AFKMenuPlayerController::CreateServer()
 {
-	UGameplayStatics::OpenLevel(GetWorld(), FName("MainLevel"), true, TEXT("/Game/FrozenKnights/Bluprint/BP_GameMode.BP_GameMode_C"));
+	UGameplayStatics::OpenLevel(GetWorld(), FName("MainLevel"), true, ((FString)(L"Listen")));
 }
 
 void AFKMenuPlayerController::JoinServer()
