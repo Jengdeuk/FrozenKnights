@@ -7,10 +7,7 @@
 #include "InputActionValue.h"
 #include "FKCharacterPlayer.generated.h"
 
-/**
- * 
- */
-UCLASS()
+UCLASS(config=ProjectFK)
 class PROJECTFK_API AFKCharacterPlayer : public AFKCharacterBase
 {
 	GENERATED_BODY()
@@ -56,4 +53,15 @@ protected:
 	void ShoulderLook(const FInputActionValue& Value);
 
 	ECharacterControlType CurrentCharacterControlType;
+
+// Character Mesh Section
+protected:
+	void UpdateMeshFromPlayerState();
+	virtual void OnRep_PlayerState() override;
+
+	UPROPERTY(config)
+	TArray<FSoftObjectPath> PlayerMeshes;
+
+	UPROPERTY(config)
+	TArray<FSoftObjectPath> PlayerAnimInstances;
 };

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Engine/StreamableManager.h"
 #include "FKCharacterBase.generated.h"
 
 UENUM()
@@ -26,6 +27,15 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "CharacterControl", Meta = (AllowPrivateAccess = "true"))
 	TMap<ECharacterControlType, class UFKCharacterControlData*> CharacterControlManager;
+
+// Character Mesh Section
+public:
+	void MeshLoadCompleted();
+	void AnimLoadCompleted();
+	void EquipHelm();
+
+	TSharedPtr<FStreamableHandle> MeshHandle;
+	TSharedPtr<FStreamableHandle> AnimHandle;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment", Meta = (AllowPrivateAccess = "true"))

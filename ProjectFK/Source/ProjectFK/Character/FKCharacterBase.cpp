@@ -31,31 +31,17 @@ AFKCharacterBase::AFKCharacterBase()
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -100.0f), FRotator(0.0f, -90.0f, 0.0f));
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
-
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/ParagonGreystone/Characters/Heroes/Greystone/Skins/WhiteTiger/Meshes/Greystone_WhiteTiger.Greystone_WhiteTiger'"));
-	if (CharacterMeshRef.Object)
-	{
-		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object);
-	}
-
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/FrozenKnights/Animation/ABP_FKGreystone.ABP_FKGreystone_C"));
-	if (AnimInstanceClassRef.Class)
-	{
-		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
-	}
+	//GetMesh()->SetHiddenInGame(true);
 
 	// Helm Component
 	Helm = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Helm"));
+	Helm->SetupAttachment(GetMesh(), TEXT("head"));
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> HelmMeshRef(TEXT("/Script/Engine.StaticMesh'/Game/ParagonGreystone/Characters/Heroes/Greystone/Skins/WhiteTiger/Meshes/SM_Greystone_TigerHelm.SM_Greystone_TigerHelm'"));
 	if (HelmMeshRef.Object)
 	{
 		HelmMesh = HelmMeshRef.Object;
 	}
-
-	Helm->SetStaticMesh(HelmMesh);
-	Helm->SetRelativeRotation(FRotator(-90.0f, 0.0f, 0.0f));
-	Helm->SetupAttachment(GetMesh(), TEXT("head"));
 }
 
 void AFKCharacterBase::SetCharacterControlData(const UFKCharacterControlData* CharacterControlData)
@@ -67,4 +53,39 @@ void AFKCharacterBase::SetCharacterControlData(const UFKCharacterControlData* Ch
 	GetCharacterMovement()->bOrientRotationToMovement = CharacterControlData->bOrientRotationToMovement;
 	GetCharacterMovement()->bUseControllerDesiredRotation = CharacterControlData->bUseControllerDesiredRotation;
 	GetCharacterMovement()->RotationRate = CharacterControlData->RotationRate;
+}
+
+void AFKCharacterBase::MeshLoadCompleted()
+{
+	if (MeshHandle.IsValid())
+	{
+		USkeletalMesh* NewMesh = Cast<USkeletalMesh>(MeshHandle->GetLoadedAsset());
+		if (NewMesh)
+		{
+			GetMesh()->SetSkeletalMesh(NewMesh);
+			GetMesh()->SetHiddenInGame(false);
+		}
+	}
+
+	MeshHandle->ReleaseHandle();
+}
+
+void AFKCharacterBase::AnimLoadCompleted()
+{
+	if (AnimHandle.IsValid())
+	{
+		UAnimInstance* NewAnim = Cast<UAnimInstance>(AnimHandle->GetLoadedAsset());
+		if (NewAnim)
+		{
+			GetMesh()->SetAnimInstanceClass(NewAnim->GetClass());
+		}
+	}
+
+	AnimHandle->ReleaseHandle();
+}
+
+void AFKCharacterBase::EquipHelm()
+{
+	Helm->SetStaticMesh(HelmMesh);
+	Helm->SetRelativeRotation(FRotator(-90.0f, 0.0f, 0.0f));
 }

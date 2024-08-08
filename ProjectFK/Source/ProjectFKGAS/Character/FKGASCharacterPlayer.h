@@ -31,7 +31,7 @@ protected:
 	void GASInputReleased(int32 InputId);
 
 protected:
-	virtual void OnRep_PlayerState();
+	virtual void OnRep_PlayerState() override;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = GAS)

@@ -8,6 +8,8 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "FKCharacterControlData.h"
+#include "Engine/AssetManager.h"
+#include "Player/FKPlayerState.h"
 
 AFKCharacterPlayer::AFKCharacterPlayer()
 {
@@ -59,6 +61,8 @@ void AFKCharacterPlayer::BeginPlay()
 void AFKCharacterPlayer::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
+
+	UpdateMeshFromPlayerState();
 }
 
 void AFKCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -130,4 +134,28 @@ void AFKCharacterPlayer::ShoulderLook(const FInputActionValue& Value)
 
 	AddControllerYawInput(LookAxisVector.X);
 	AddControllerPitchInput(LookAxisVector.Y);
+}
+
+void AFKCharacterPlayer::UpdateMeshFromPlayerState()
+{
+	AFKPlayerState* PS = GetPlayerState<AFKPlayerState>();
+	EPlayerClass PlayerClass = PS->GetClass();
+	//int8 PlayerClass = FMath::Clamp(PS->PlayerId % PlayerMeshes.Num(), 0, PlayerMeshes.Num() - 1);
+	
+	// Mesh
+	MeshHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(PlayerMeshes[uint8(PlayerClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::MeshLoadCompleted));
+	if (PlayerClass == EPlayerClass::Knight)
+	{
+		Super::EquipHelm();
+	}
+
+	// AnimInstance
+	AnimHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(PlayerAnimInstances[uint8(PlayerClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AnimLoadCompleted));
+}
+
+void AFKCharacterPlayer::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	UpdateMeshFromPlayerState();
 }

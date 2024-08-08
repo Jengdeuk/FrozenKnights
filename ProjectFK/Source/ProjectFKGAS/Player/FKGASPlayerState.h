@@ -4,14 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
+#include "Player/FKPlayerState.h"
 #include "AbilitySystemInterface.h"
 #include "FKGASPlayerState.generated.h"
 
-/**
- * 
- */
 UCLASS()
-class PROJECTFKGAS_API AFKGASPlayerState : public APlayerState, public IAbilitySystemInterface
+class PROJECTFKGAS_API AFKGASPlayerState : public AFKPlayerState, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 	
