@@ -22,8 +22,8 @@ public:
 	AFKPlayerState();
 
 public:
-	FORCEINLINE const EPlayerClass& GetClass() const { return Class; }
+	FORCEINLINE const EPlayerClass& GetPlayerClass() const { return PlayerClass; }
 
 protected:
-	EPlayerClass Class;
+	EPlayerClass PlayerClass;
 };

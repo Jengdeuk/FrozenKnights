@@ -5,5 +5,5 @@
 
 AFKPlayerState::AFKPlayerState()
 {
-	Class = EPlayerClass::Mage;
+	PlayerClass = EPlayerClass::Mage;
 }

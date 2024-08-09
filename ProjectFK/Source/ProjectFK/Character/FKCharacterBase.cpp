@@ -74,10 +74,10 @@ void AFKCharacterBase::AnimLoadCompleted()
 {
 	if (AnimHandle.IsValid())
 	{
-		UAnimInstance* NewAnim = Cast<UAnimInstance>(AnimHandle->GetLoadedAsset());
+		UClass* NewAnim = Cast<UClass>(AnimHandle->GetLoadedAsset());
 		if (NewAnim)
 		{
-			GetMesh()->SetAnimInstanceClass(NewAnim->GetClass());
+			GetMesh()->SetAnimInstanceClass(NewAnim);
 		}
 	}
 
