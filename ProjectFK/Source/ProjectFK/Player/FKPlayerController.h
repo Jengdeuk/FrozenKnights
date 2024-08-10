@@ -13,7 +13,23 @@ UCLASS()
 class PROJECTFK_API AFKPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+
+public:
+	AFKPlayerController();
+
 public:
 	virtual void BeginPlay() override;
+
+public:
+	void StartGame();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPCSelectClass(const EPlayerClass& PlayerClass);
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<class UFKClassSelectWidget> ClassSelectUIClass;
+
+	UPROPERTY()
+	TObjectPtr<class UFKClassSelectWidget> ClassSelectUI;
 };

@@ -139,12 +139,15 @@ void AFKCharacterPlayer::ShoulderLook(const FInputActionValue& Value)
 void AFKCharacterPlayer::UpdateMeshFromPlayerState()
 {
 	AFKPlayerState* PS = GetPlayerState<AFKPlayerState>();
-	//EPlayerClass PlayerClass = PS->GetPlayerClass();
-	int8 PlayerClass = FMath::Clamp(PS->PlayerId % PlayerMeshes.Num(), 0, PlayerMeshes.Num() - 1);
+	EPlayerClass PlayerClass = PS->GetPlayerClass();
+	if (PlayerClass == EPlayerClass::None)
+	{
+		return;
+	}
 	
 	// Mesh
 	MeshHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(PlayerMeshes[uint8(PlayerClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::MeshLoadCompleted));
-	if (PlayerClass == (int8)EPlayerClass::Knight)
+	if (PlayerClass == EPlayerClass::Knight)
 	{
 		Super::EquipHelm();
 	}

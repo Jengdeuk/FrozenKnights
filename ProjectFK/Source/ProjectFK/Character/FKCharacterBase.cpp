@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Physics/FKCollision.h"
 #include "FKCharacterControlData.h"
+#include "Player/FKPlayerController.h"
 
 AFKCharacterBase::AFKCharacterBase()
 {
@@ -65,6 +66,12 @@ void AFKCharacterBase::MeshLoadCompleted()
 			GetMesh()->SetSkeletalMesh(NewMesh);
 			GetMesh()->SetHiddenInGame(false);
 		}
+
+		if (IsLocallyControlled())
+		{
+			AFKPlayerController* PlayerController = CastChecked<AFKPlayerController>(GetController());
+			PlayerController->StartGame();
+		}
 	}
 
 	MeshHandle->ReleaseHandle();
@@ -78,6 +85,12 @@ void AFKCharacterBase::AnimLoadCompleted()
 		if (NewAnim)
 		{
 			GetMesh()->SetAnimInstanceClass(NewAnim);
+		}
+
+		if (IsLocallyControlled())
+		{
+			AFKPlayerController* PlayerController = CastChecked<AFKPlayerController>(GetController());
+			PlayerController->StartGame();
 		}
 	}
 

@@ -10,7 +10,8 @@ UENUM()
 enum class EPlayerClass : uint8
 {
 	Knight,
-	Mage
+	Mage,
+	None
 };
 
 UCLASS()
@@ -23,7 +24,16 @@ public:
 
 public:
 	FORCEINLINE const EPlayerClass& GetPlayerClass() const { return PlayerClass; }
+	FORCEINLINE void SetPlayerClass(const EPlayerClass& InPlayerClass) { PlayerClass = InPlayerClass; }
+
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+public:
+	UFUNCTION()
+	void OnRep_UpdatePlayerClass();
 
 protected:
+	UPROPERTY(ReplicatedUsing = OnRep_UpdatePlayerClass)
 	EPlayerClass PlayerClass;
 };

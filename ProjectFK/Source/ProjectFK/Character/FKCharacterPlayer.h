@@ -55,8 +55,10 @@ protected:
 	ECharacterControlType CurrentCharacterControlType;
 
 // Character Mesh Section
-protected:
+public:
 	void UpdateMeshFromPlayerState();
+
+protected:
 	virtual void OnRep_PlayerState() override;
 
 	UPROPERTY(config)
