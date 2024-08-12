@@ -7,6 +7,8 @@
 #include "Engine/StreamableManager.h"
 #include "FKCharacterBase.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FInitMeshCompletedSignature);
+
 UENUM()
 enum class ECharacterControlType : uint8
 {
@@ -32,15 +34,9 @@ protected:
 public:
 	void MeshLoadCompleted();
 	void AnimLoadCompleted();
-	void EquipHelm();
-
+	
+protected:
+	FInitMeshCompletedSignature OnMeshLoadCompleted;
 	TSharedPtr<FStreamableHandle> MeshHandle;
 	TSharedPtr<FStreamableHandle> AnimHandle;
-
-protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UStaticMeshComponent> Helm;
-
-	UPROPERTY(EditAnywhere, Category = "Helm")
-	TObjectPtr<class UStaticMesh> HelmMesh;
 };

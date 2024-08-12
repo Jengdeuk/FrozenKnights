@@ -5,6 +5,7 @@
 #include "Character/FKCharacterPlayer.h"
 #include "Player/FKPlayerState.h"
 #include "UI/FKClassSelectWidget.h"
+#include "EngineUtils.h"
 
 AFKPlayerController::AFKPlayerController()
 {
@@ -52,5 +53,5 @@ void AFKPlayerController::ServerRPCSelectClass_Implementation(const EPlayerClass
 {
 	AFKPlayerState* PS = GetPlayerState<AFKPlayerState>();
 	PS->SetPlayerClass(PlayerClass);
-	PS->OnRep_SelectClass();
+	PS->OnRep_UpdatePlayerClass();
 }

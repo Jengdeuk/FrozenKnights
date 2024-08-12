@@ -4,6 +4,7 @@
 #include "Player/FKPlayerState.h"
 #include "Character/FKCharacterPlayer.h"
 #include "Net/UnrealNetwork.h"
+#include "ProjectFK.h"
 
 AFKPlayerState::AFKPlayerState()
 {
@@ -21,10 +22,11 @@ void AFKPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 void AFKPlayerState::OnRep_UpdatePlayerClass()
 {
-	if (GetOwningController() == nullptr)
+	AFKCharacterPlayer* Player = GetPawn<AFKCharacterPlayer>();
+	if (!Player)
 	{
 		return;
 	}
 
-	GetPawn<AFKCharacterPlayer>()->UpdateMeshFromPlayerState();
+	Player->UpdateMeshFromPlayerState();
 }

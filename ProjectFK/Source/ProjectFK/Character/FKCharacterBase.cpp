@@ -33,16 +33,6 @@ AFKCharacterBase::AFKCharacterBase()
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
 	//GetMesh()->SetHiddenInGame(true);
-
-	// Helm Component
-	Helm = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Helm"));
-	Helm->SetupAttachment(GetMesh(), TEXT("head"));
-
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> HelmMeshRef(TEXT("/Script/Engine.StaticMesh'/Game/ParagonGreystone/Characters/Heroes/Greystone/Skins/WhiteTiger/Meshes/SM_Greystone_TigerHelm.SM_Greystone_TigerHelm'"));
-	if (HelmMeshRef.Object)
-	{
-		HelmMesh = HelmMeshRef.Object;
-	}
 }
 
 void AFKCharacterBase::SetCharacterControlData(const UFKCharacterControlData* CharacterControlData)
@@ -65,12 +55,7 @@ void AFKCharacterBase::MeshLoadCompleted()
 		{
 			GetMesh()->SetSkeletalMesh(NewMesh);
 			GetMesh()->SetHiddenInGame(false);
-		}
-
-		if (IsLocallyControlled())
-		{
-			AFKPlayerController* PlayerController = CastChecked<AFKPlayerController>(GetController());
-			PlayerController->StartGame();
+			OnMeshLoadCompleted.Broadcast();
 		}
 	}
 
@@ -86,19 +71,7 @@ void AFKCharacterBase::AnimLoadCompleted()
 		{
 			GetMesh()->SetAnimInstanceClass(NewAnim);
 		}
-
-		if (IsLocallyControlled())
-		{
-			AFKPlayerController* PlayerController = CastChecked<AFKPlayerController>(GetController());
-			PlayerController->StartGame();
-		}
 	}
 
 	AnimHandle->ReleaseHandle();
-}
-
-void AFKCharacterBase::EquipHelm()
-{
-	Helm->SetStaticMesh(HelmMesh);
-	Helm->SetRelativeRotation(FRotator(-90.0f, 0.0f, 0.0f));
 }

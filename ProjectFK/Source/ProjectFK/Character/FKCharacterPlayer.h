@@ -57,13 +57,21 @@ protected:
 // Character Mesh Section
 public:
 	void UpdateMeshFromPlayerState();
-
-protected:
+	void OnInitMeshCompleted();
+	void EquipHelm();
 	virtual void OnRep_PlayerState() override;
 
+protected:
 	UPROPERTY(config)
 	TArray<FSoftObjectPath> PlayerMeshes;
 
 	UPROPERTY(config)
 	TArray<FSoftObjectPath> PlayerAnimInstances;
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UStaticMeshComponent> Helm;
+
+	UPROPERTY(EditAnywhere, Category = "Helm")
+	TObjectPtr<class UStaticMesh> HelmMesh;
 };
