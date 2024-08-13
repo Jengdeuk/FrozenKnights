@@ -7,7 +7,7 @@
 #include "Engine/StreamableManager.h"
 #include "FKCharacterBase.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FInitMeshCompletedSignature);
+DECLARE_MULTICAST_DELEGATE(FMeshLoadCompletedSignature);
 
 UENUM()
 enum class ECharacterControlType : uint8
@@ -24,19 +24,34 @@ class PROJECTFK_API AFKCharacterBase : public ACharacter
 public:
 	AFKCharacterBase();
 
+public:
+	FORCEINLINE virtual class UAnimMontage* GetAttackMontage() const { return AttackMontage; }
+	FORCEINLINE class UFKComboActionData* GetComboActionData() const { return ComboActionData; }
+
 protected:
 	virtual void SetCharacterControlData(const class UFKCharacterControlData* CharacterControlData);
 
 	UPROPERTY(EditAnywhere, Category = "CharacterControl", Meta = (AllowPrivateAccess = "true"))
 	TMap<ECharacterControlType, class UFKCharacterControlData*> CharacterControlManager;
 
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	TObjectPtr<class UAnimMontage> AttackMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UFKComboActionData> ComboActionData;
+
 // Character Mesh Section
 public:
 	void MeshLoadCompleted();
 	void AnimLoadCompleted();
+	void AttackMontageLoadCompleted();
+	void ComboActionDataLoadCompleted();
 	
 protected:
-	FInitMeshCompletedSignature OnMeshLoadCompleted;
+	FMeshLoadCompletedSignature OnMeshLoadCompleted;
 	TSharedPtr<FStreamableHandle> MeshHandle;
 	TSharedPtr<FStreamableHandle> AnimHandle;
+	TSharedPtr<FStreamableHandle> AttackHandle;
+	TSharedPtr<FStreamableHandle> ComboActionHandle;
 };

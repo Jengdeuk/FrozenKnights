@@ -7,6 +7,8 @@
 #include "Physics/FKCollision.h"
 #include "FKCharacterControlData.h"
 #include "Player/FKPlayerController.h"
+#include "Engine/AssetManager.h"
+#include "Character/FKComboActionData.h"
 
 AFKCharacterBase::AFKCharacterBase()
 {
@@ -32,7 +34,7 @@ AFKCharacterBase::AFKCharacterBase()
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -100.0f), FRotator(0.0f, -90.0f, 0.0f));
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
-	//GetMesh()->SetHiddenInGame(true);
+	GetMesh()->SetHiddenInGame(true);
 }
 
 void AFKCharacterBase::SetCharacterControlData(const UFKCharacterControlData* CharacterControlData)
@@ -54,8 +56,6 @@ void AFKCharacterBase::MeshLoadCompleted()
 		if (NewMesh)
 		{
 			GetMesh()->SetSkeletalMesh(NewMesh);
-			GetMesh()->SetHiddenInGame(false);
-			OnMeshLoadCompleted.Broadcast();
 		}
 	}
 
@@ -70,8 +70,30 @@ void AFKCharacterBase::AnimLoadCompleted()
 		if (NewAnim)
 		{
 			GetMesh()->SetAnimInstanceClass(NewAnim);
+			GetMesh()->SetHiddenInGame(false);
+			OnMeshLoadCompleted.Broadcast();
 		}
 	}
 
 	AnimHandle->ReleaseHandle();
+}
+
+void AFKCharacterBase::AttackMontageLoadCompleted()
+{
+	if (AttackHandle.IsValid())
+	{
+		AttackMontage = Cast<UAnimMontage>(AttackHandle->GetLoadedAsset());
+	}
+
+	AttackHandle->ReleaseHandle();
+}
+
+void AFKCharacterBase::ComboActionDataLoadCompleted()
+{
+	if (ComboActionHandle.IsValid())
+	{
+		ComboActionData = Cast<UFKComboActionData>(ComboActionHandle->GetLoadedAsset());
+	}
+
+	ComboActionHandle->ReleaseHandle();
 }

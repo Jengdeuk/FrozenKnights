@@ -161,6 +161,8 @@ void AFKCharacterPlayer::UpdateMeshFromPlayerState()
 	
 	MeshHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(PlayerMeshes[uint8(PlayerClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::MeshLoadCompleted));
 	AnimHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(PlayerAnimInstances[uint8(PlayerClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AnimLoadCompleted));
+	AttackHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(PlayerAttackMontages[uint8(PlayerClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AttackMontageLoadCompleted));
+	ComboActionHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(PlayerComboActionData[uint8(PlayerClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::ComboActionDataLoadCompleted));
 }
 
 void AFKCharacterPlayer::OnInitMeshCompleted()

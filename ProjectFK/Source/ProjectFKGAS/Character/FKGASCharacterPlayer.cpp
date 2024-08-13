@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "AbilitySystemComponent.h"
 #include "Player/FKGASPlayerState.h"
+#include "ProjectFKGAS.h"
 
 AFKGASCharacterPlayer::AFKGASCharacterPlayer()
 {
@@ -66,7 +67,7 @@ void AFKGASCharacterPlayer::SetupGASInputComponent()
 
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AFKGASCharacterPlayer::GASInputPressed, 0);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AFKGASCharacterPlayer::GASInputReleased, 0);
-		//EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AFKGASCharacterPlayer::GASInputPressed, 1);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AFKGASCharacterPlayer::GASInputPressed, 1);
 	}
 }
 

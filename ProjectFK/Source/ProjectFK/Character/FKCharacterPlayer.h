@@ -68,6 +68,12 @@ protected:
 	UPROPERTY(config)
 	TArray<FSoftObjectPath> PlayerAnimInstances;
 
+	UPROPERTY(config)
+	TArray<FSoftObjectPath> PlayerAttackMontages;
+
+	UPROPERTY(config)
+	TArray<FSoftObjectPath> PlayerComboActionData;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UStaticMeshComponent> Helm;
