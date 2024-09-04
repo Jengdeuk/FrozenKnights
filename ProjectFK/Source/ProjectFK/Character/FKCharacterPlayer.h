@@ -18,9 +18,27 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void PossessedBy(AController* NewController) override;
+	virtual void SetDead() override;
 
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+public:
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPCPlayAttackMontage();
+
+	UFUNCTION(Client, Unreliable)
+	void ClientRPCPlayAttackMontage(AFKCharacterPlayer* CharacterToPlay);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPCMontageJumpToSection(FName SectionName);
+
+	UFUNCTION(Client, Unreliable)
+	void ClientRPCMontageJumpToSection(AFKCharacterPlayer* CharacterToPlay, FName SectionName);
+
+	void PlayAttackMontage();
+
+	void JumpMontageToSection(FName SectionName);
 
 // Character Control Section
 protected:
@@ -70,6 +88,9 @@ protected:
 
 	UPROPERTY(config)
 	TArray<FSoftObjectPath> PlayerAttackMontages;
+
+	UPROPERTY(config)
+	TArray<FSoftObjectPath> PlayerDeadMontages;
 
 	UPROPERTY(config)
 	TArray<FSoftObjectPath> PlayerComboActionData;

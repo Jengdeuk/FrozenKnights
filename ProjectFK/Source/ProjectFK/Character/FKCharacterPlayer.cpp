@@ -12,6 +12,7 @@
 #include "Player/FKPlayerController.h"
 #include "Player/FKPlayerState.h"
 #include "ProjectFK.h"
+#include "EngineUtils.h"
 
 AFKCharacterPlayer::AFKCharacterPlayer()
 {
@@ -63,6 +64,7 @@ AFKCharacterPlayer::AFKCharacterPlayer()
 	}
 
 	OnMeshLoadCompleted.AddUObject(this, &AFKCharacterPlayer::OnInitMeshCompleted);
+	OnDead.AddUObject(this, &AFKCharacterPlayer::SetDead);
 }
 
 void AFKCharacterPlayer::BeginPlay()
@@ -79,6 +81,20 @@ void AFKCharacterPlayer::PossessedBy(AController* NewController)
 	UpdateMeshFromPlayerState();
 }
 
+void AFKCharacterPlayer::SetDead()
+{
+	Super::SetDead();
+
+	if (IsLocallyControlled())
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(GetController());
+		if (PlayerController)
+		{
+			DisableInput(PlayerController);
+		}
+	}
+}
+
 void AFKCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -87,6 +103,81 @@ void AFKCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &AFKCharacterPlayer::ShoulderMove);
 	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &AFKCharacterPlayer::ShoulderLook);
+}
+
+bool AFKCharacterPlayer::ServerRPCPlayAttackMontage_Validate()
+{
+	return true;
+}
+
+void AFKCharacterPlayer::ServerRPCPlayAttackMontage_Implementation()
+{
+	for (APlayerController* PlayerController : TActorRange<APlayerController>(GetWorld()))
+	{
+		if (PlayerController && GetController() != PlayerController)
+		{
+			if (!PlayerController->IsLocalController())
+			{
+				AFKCharacterPlayer* OtherPlayer = Cast<AFKCharacterPlayer>(PlayerController->GetPawn());
+				if (OtherPlayer)
+				{
+					OtherPlayer->ClientRPCPlayAttackMontage(this);
+				}
+			}
+		}
+	}
+}
+
+void AFKCharacterPlayer::ClientRPCPlayAttackMontage_Implementation(AFKCharacterPlayer* CharacterToPlay)
+{
+	if (CharacterToPlay)
+	{
+		CharacterToPlay->PlayAttackMontage();
+	}
+}
+
+bool AFKCharacterPlayer::ServerRPCMontageJumpToSection_Validate(FName SectionName)
+{
+	return true;
+}
+
+void AFKCharacterPlayer::ServerRPCMontageJumpToSection_Implementation(FName SectionName)
+{
+	for (APlayerController* PlayerController : TActorRange<APlayerController>(GetWorld()))
+	{
+		if (PlayerController && GetController() != PlayerController)
+		{
+			if (!PlayerController->IsLocalController())
+			{
+				AFKCharacterPlayer* OtherPlayer = Cast<AFKCharacterPlayer>(PlayerController->GetPawn());
+				if (OtherPlayer)
+				{
+					OtherPlayer->ClientRPCMontageJumpToSection(this, SectionName);
+				}
+			}
+		}
+	}
+}
+
+void AFKCharacterPlayer::ClientRPCMontageJumpToSection_Implementation(AFKCharacterPlayer* CharacterToPlay, FName SectionName)
+{
+	if (CharacterToPlay)
+	{
+		CharacterToPlay->JumpMontageToSection(SectionName);
+	}
+}
+
+void AFKCharacterPlayer::PlayAttackMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	AnimInstance->StopAllMontages(0.0f);
+	AnimInstance->Montage_Play(AttackMontage);
+}
+
+void AFKCharacterPlayer::JumpMontageToSection(FName SectionName)
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	AnimInstance->Montage_JumpToSection(SectionName);
 }
 
 void AFKCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterControlType)
@@ -162,6 +253,7 @@ void AFKCharacterPlayer::UpdateMeshFromPlayerState()
 	MeshHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(PlayerMeshes[uint8(PlayerClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::MeshLoadCompleted));
 	AnimHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(PlayerAnimInstances[uint8(PlayerClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AnimLoadCompleted));
 	AttackHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(PlayerAttackMontages[uint8(PlayerClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AttackMontageLoadCompleted));
+	DeadHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(PlayerDeadMontages[uint8(PlayerClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::DeadMontageLoadCompleted));
 	ComboActionHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(PlayerComboActionData[uint8(PlayerClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::ComboActionDataLoadCompleted));
 }
 

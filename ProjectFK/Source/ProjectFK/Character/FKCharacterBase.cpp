@@ -9,6 +9,7 @@
 #include "Player/FKPlayerController.h"
 #include "Engine/AssetManager.h"
 #include "Character/FKComboActionData.h"
+#include "Net/UnrealNetwork.h"
 
 AFKCharacterBase::AFKCharacterBase()
 {
@@ -35,6 +36,9 @@ AFKCharacterBase::AFKCharacterBase()
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
 	GetMesh()->SetHiddenInGame(true);
+
+	bReplicates = true;
+	bDead = false;
 }
 
 void AFKCharacterBase::SetCharacterControlData(const UFKCharacterControlData* CharacterControlData)
@@ -88,6 +92,16 @@ void AFKCharacterBase::AttackMontageLoadCompleted()
 	AttackHandle->ReleaseHandle();
 }
 
+void AFKCharacterBase::DeadMontageLoadCompleted()
+{
+	if (DeadHandle.IsValid())
+	{
+		DeadMontage = Cast<UAnimMontage>(DeadHandle->GetLoadedAsset());
+	}
+
+	DeadHandle->ReleaseHandle();
+}
+
 void AFKCharacterBase::ComboActionDataLoadCompleted()
 {
 	if (ComboActionHandle.IsValid())
@@ -96,4 +110,30 @@ void AFKCharacterBase::ComboActionDataLoadCompleted()
 	}
 
 	ComboActionHandle->ReleaseHandle();
+}
+
+void AFKCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AFKCharacterBase, bDead);
+}
+
+void AFKCharacterBase::SetDead()
+{
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	PlayDeadAnimation();
+	SetActorEnableCollision(false);
+}
+
+void AFKCharacterBase::PlayDeadAnimation()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	AnimInstance->StopAllMontages(0.0f);
+	AnimInstance->Montage_Play(DeadMontage, 1.0f);
+}
+
+void AFKCharacterBase::OnRep_Dead()
+{
+	OnDead.Broadcast();
 }

@@ -8,6 +8,7 @@
 #include "FKCharacterBase.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FMeshLoadCompletedSignature);
+DECLARE_MULTICAST_DELEGATE(FDeadSignature);
 
 UENUM()
 enum class ECharacterControlType : uint8
@@ -41,11 +42,15 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UFKComboActionData> ComboActionData;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UAnimMontage> DeadMontage;
+
 // Character Mesh Section
 public:
 	void MeshLoadCompleted();
 	void AnimLoadCompleted();
 	void AttackMontageLoadCompleted();
+	void DeadMontageLoadCompleted();
 	void ComboActionDataLoadCompleted();
 	
 protected:
@@ -53,5 +58,20 @@ protected:
 	TSharedPtr<FStreamableHandle> MeshHandle;
 	TSharedPtr<FStreamableHandle> AnimHandle;
 	TSharedPtr<FStreamableHandle> AttackHandle;
+	TSharedPtr<FStreamableHandle> DeadHandle;
 	TSharedPtr<FStreamableHandle> ComboActionHandle;
+
+// Dead Section
+protected:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void SetDead();
+	void PlayDeadAnimation();
+
+	FDeadSignature OnDead;
+
+	UFUNCTION()
+	void OnRep_Dead();
+
+	UPROPERTY(ReplicatedUsing = "OnRep_Dead")
+	bool bDead;
 };

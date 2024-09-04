@@ -30,6 +30,9 @@ protected:
 	void GASInputPressed(int32 InputId);
 	void GASInputReleased(int32 InputId);
 
+	UFUNCTION()
+	virtual void OnOutOfHealth();
+
 protected:
 	virtual void OnRep_PlayerState() override;
 

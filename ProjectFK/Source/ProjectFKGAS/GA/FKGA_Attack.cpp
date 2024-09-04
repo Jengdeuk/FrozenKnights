@@ -3,6 +3,7 @@
 
 #include "GA/FKGA_Attack.h"
 #include "Character/FKCharacterBase.h"
+#include "Character/FKCharacterPlayer.h"
 #include "Character/FKGASCharacterPlayer.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -25,6 +26,8 @@ void UFKGA_Attack::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 	PlayAttackTask->OnCompleted.AddDynamic(this, &UFKGA_Attack::OnCompleteCallback);
 	PlayAttackTask->OnInterrupted.AddDynamic(this, &UFKGA_Attack::OnInterruptedCallback);
 	PlayAttackTask->ReadyForActivation();
+
+	CastChecked<AFKCharacterPlayer>(FKCharacter)->ServerRPCPlayAttackMontage();
 
 	StartComboTimer();
 }
@@ -96,7 +99,15 @@ void UFKGA_Attack::CheckComboInput()
 	ComboTimerHandle.Invalidate();
 	if (bHasNextComboInput)
 	{
-		MontageJumpToSection(GetNextSection());
+		FName NextSectionName = GetNextSection();
+		MontageJumpToSection(NextSectionName);
+
+		AFKCharacterPlayer* FKCharacter = CastChecked<AFKCharacterPlayer>(GetActorInfo().AvatarActor.Get());
+		if (FKCharacter)
+		{
+			FKCharacter->ServerRPCMontageJumpToSection(NextSectionName);
+		}
+
 		StartComboTimer();
 		bHasNextComboInput = false;
 	}

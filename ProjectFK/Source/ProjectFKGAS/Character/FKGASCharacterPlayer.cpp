@@ -6,6 +6,10 @@
 #include "AbilitySystemComponent.h"
 #include "Player/FKGASPlayerState.h"
 #include "ProjectFKGAS.h"
+#include "Attribute/FKCharacterAttributeSet.h"
+#include "Net/UnrealNetwork.h"
+#include "EngineUtils.h"
+#include "ProjectFKGAS.h"
 
 AFKGASCharacterPlayer::AFKGASCharacterPlayer()
 {
@@ -31,6 +35,12 @@ void AFKGASCharacterPlayer::PossessedBy(AController* NewController)
 	{
 		ASC = GASPS->GetAbilitySystemComponent();
 		ASC->InitAbilityActorInfo(GASPS, this);
+
+		const UFKCharacterAttributeSet* CurrentAttributeSet = ASC->GetSet<UFKCharacterAttributeSet>();
+		if (CurrentAttributeSet)
+		{
+			CurrentAttributeSet->OnOutOfHealth.AddDynamic(this, &ThisClass::OnOutOfHealth);
+		}
 
 		for (const auto& StartAbility : StartAbilities)
 		{
@@ -101,6 +111,12 @@ void AFKGASCharacterPlayer::GASInputReleased(int32 InputId)
 	}
 }
 
+void AFKGASCharacterPlayer::OnOutOfHealth()
+{
+	SetDead();
+	bDead = true;
+}
+
 void AFKGASCharacterPlayer::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
@@ -115,6 +131,12 @@ void AFKGASCharacterPlayer::OnRep_PlayerState()
 	{
 		ASC = GASPS->GetAbilitySystemComponent();
 		ASC->InitAbilityActorInfo(GASPS, this);
+
+		const UFKCharacterAttributeSet* CurrentAttributeSet = ASC->GetSet<UFKCharacterAttributeSet>();
+		if (CurrentAttributeSet)
+		{
+			CurrentAttributeSet->OnOutOfHealth.AddDynamic(this, &ThisClass::OnOutOfHealth);
+		}
 
 		for (const auto& StartAbility : StartAbilities)
 		{
