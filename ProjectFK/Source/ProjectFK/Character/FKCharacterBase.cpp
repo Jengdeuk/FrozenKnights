@@ -10,6 +10,7 @@
 #include "Engine/AssetManager.h"
 #include "Character/FKComboActionData.h"
 #include "Net/UnrealNetwork.h"
+#include "Components/WidgetComponent.h"
 
 AFKCharacterBase::AFKCharacterBase()
 {
@@ -124,6 +125,7 @@ void AFKCharacterBase::SetDead()
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 	PlayDeadAnimation();
 	SetActorEnableCollision(false);
+	HpBar->SetHiddenInGame(true);
 }
 
 void AFKCharacterBase::PlayDeadAnimation()

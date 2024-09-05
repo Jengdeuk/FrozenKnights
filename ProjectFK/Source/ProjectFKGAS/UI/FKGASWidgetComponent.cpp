@@ -2,4 +2,15 @@
 
 
 #include "UI/FKGASWidgetComponent.h"
+#include "UI/FKGASUserWidget.h"
 
+void UFKGASWidgetComponent::InitWidget()
+{
+	Super::InitWidget();
+
+	UFKGASUserWidget* GASUserWidget = Cast<UFKGASUserWidget>(GetWidget());
+	if (GASUserWidget)
+	{
+		GASUserWidget->SetAbilitySystemComponent(GetOwner());
+	}
+}

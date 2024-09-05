@@ -14,4 +14,6 @@ class PROJECTFKGAS_API UFKGASWidgetComponent : public UWidgetComponent
 {
 	GENERATED_BODY()
 	
+protected:
+	virtual void InitWidget() override;
 };

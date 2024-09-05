@@ -13,6 +13,7 @@
 #include "Player/FKPlayerState.h"
 #include "ProjectFK.h"
 #include "EngineUtils.h"
+#include "Components/WidgetComponent.h"
 
 AFKCharacterPlayer::AFKCharacterPlayer()
 {
@@ -265,6 +266,8 @@ void AFKCharacterPlayer::OnInitMeshCompleted()
 	{
 		EquipHelm();
 	}
+
+	HpBar->SetHiddenInGame(false);
 
 	if (IsLocallyControlled())
 	{

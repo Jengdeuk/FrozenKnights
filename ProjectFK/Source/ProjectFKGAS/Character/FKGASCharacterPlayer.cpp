@@ -10,10 +10,27 @@
 #include "Net/UnrealNetwork.h"
 #include "EngineUtils.h"
 #include "ProjectFKGAS.h"
+#include "UI/FKGASWidgetComponent.h"
+#include "UI/FKGASUserWidget.h"
+#include "UI/FKGASHpBarUserWidget.h"
 
 AFKGASCharacterPlayer::AFKGASCharacterPlayer()
 {
 	ASC = nullptr;
+
+	// UI
+	HpBar = CreateDefaultSubobject<UFKGASWidgetComponent>(TEXT("Widget"));
+	HpBar->SetupAttachment(GetMesh());
+	HpBar->SetRelativeLocation(FVector(0.0f, 0.0f, 215.0f));
+	static ConstructorHelpers::FClassFinder<UUserWidget> HpBarWidgetRef(TEXT("/Game/FrozenKnights/UI/WBP_HpBar.WBP_HpBar_C"));
+	if (HpBarWidgetRef.Class)
+	{
+		HpBar->SetWidgetClass(HpBarWidgetRef.Class);
+		HpBar->SetWidgetSpace(EWidgetSpace::Screen);
+		HpBar->SetDrawSize(FVector2D(140.0f, 18.f));
+		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		HpBar->SetHiddenInGame(true);
+	}
 }
 
 UAbilitySystemComponent* AFKGASCharacterPlayer::GetAbilitySystemComponent() const
@@ -56,6 +73,11 @@ void AFKGASCharacterPlayer::PossessedBy(AController* NewController)
 		}
 
 		SetupGASInputComponent();
+
+		if (!IsLocallyControlled())
+		{
+			Cast<UFKGASHpBarUserWidget>(HpBar->GetWidget())->SetAbilitySystemComponent(this);
+		}
 
 		APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
 		PlayerController->ConsoleCommand(TEXT("showdebug abilitysystem"));
@@ -121,11 +143,6 @@ void AFKGASCharacterPlayer::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
-	if (!IsLocallyControlled())
-	{
-		return;
-	}
-
 	AFKGASPlayerState* GASPS = GetPlayerState<AFKGASPlayerState>();
 	if (GASPS)
 	{
@@ -153,7 +170,16 @@ void AFKGASCharacterPlayer::OnRep_PlayerState()
 
 		SetupGASInputComponent();
 
-		APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
-		PlayerController->ConsoleCommand(TEXT("showdebug abilitysystem"));
+		UFKGASHpBarUserWidget* HpBarUserWidget = Cast<UFKGASHpBarUserWidget>(HpBar->GetWidget());
+		if (HpBarUserWidget)
+		{
+			HpBarUserWidget->SetAbilitySystemComponent(this);
+		}
+
+		if (IsLocallyControlled())
+		{
+			APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
+			PlayerController->ConsoleCommand(TEXT("showdebug abilitysystem"));
+		}
 	}
 }

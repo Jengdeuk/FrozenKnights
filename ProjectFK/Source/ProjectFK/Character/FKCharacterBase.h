@@ -74,4 +74,7 @@ protected:
 
 	UPROPERTY(ReplicatedUsing = "OnRep_Dead")
 	bool bDead;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UWidgetComponent> HpBar;
 };

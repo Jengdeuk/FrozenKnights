@@ -2,4 +2,17 @@
 
 
 #include "UI/FKGASUserWidget.h"
+#include "AbilitySystemBlueprintLibrary.h"
 
+void UFKGASUserWidget::SetAbilitySystemComponent(AActor* InOwner)
+{
+	if (IsValid(InOwner))
+	{
+		ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(InOwner);
+	}
+}
+
+UAbilitySystemComponent* UFKGASUserWidget::GetAbilitySystemComponent() const
+{
+	return ASC;
+}
