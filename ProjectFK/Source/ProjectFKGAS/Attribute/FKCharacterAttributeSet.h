@@ -26,6 +26,10 @@ class PROJECTFKGAS_API UFKCharacterAttributeSet : public UAttributeSet
 public:
 	UFKCharacterAttributeSet();
 
+	ATTRIBUTE_ACCESSORS(UFKCharacterAttributeSet, AttackRange);
+	ATTRIBUTE_ACCESSORS(UFKCharacterAttributeSet, MaxAttackRange);
+	ATTRIBUTE_ACCESSORS(UFKCharacterAttributeSet, AttackRadius);
+	ATTRIBUTE_ACCESSORS(UFKCharacterAttributeSet, MaxAttackRadius);
 	ATTRIBUTE_ACCESSORS(UFKCharacterAttributeSet, AttackRate);
 	ATTRIBUTE_ACCESSORS(UFKCharacterAttributeSet, MaxAttackRate);
 	ATTRIBUTE_ACCESSORS(UFKCharacterAttributeSet, Health);
@@ -41,6 +45,18 @@ public:
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Attack", ReplicatedUsing = "OnRep_AttackRange", Meta = (AllowPrivateAccess = true))
+	FGameplayAttributeData AttackRange;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Attack", ReplicatedUsing = "OnRep_MaxAttackRange", Meta = (AllowPrivateAccess = true))
+	FGameplayAttributeData MaxAttackRange;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Attack", ReplicatedUsing = "OnRep_AttackRadius", Meta = (AllowPrivateAccess = true))
+	FGameplayAttributeData AttackRadius;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Attack", ReplicatedUsing = "OnRep_MaxAttackRadius", Meta = (AllowPrivateAccess = true))
+	FGameplayAttributeData MaxAttackRadius;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Attack", ReplicatedUsing = "OnRep_AttackRate", Meta = (AllowPrivateAccess = true))
 	FGameplayAttributeData AttackRate;
 
@@ -55,6 +71,18 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Attack", Meta = (AllowPrivateAccess = true))
 	FGameplayAttributeData Damage;
+
+	UFUNCTION()
+	void OnRep_AttackRange(const FGameplayAttributeData& OldAttackRange) const;
+
+	UFUNCTION()
+	void OnRep_MaxAttackRange(const FGameplayAttributeData& OldMaxAttackRange) const;
+
+	UFUNCTION()
+	void OnRep_AttackRadius(const FGameplayAttributeData& OldAttackRadius) const;
+
+	UFUNCTION()
+	void OnRep_MaxAttackRadius(const FGameplayAttributeData& OldMaxAttackRadius) const;
 
 	UFUNCTION()
 	void OnRep_AttackRate(const FGameplayAttributeData& OldAttackRate) const;

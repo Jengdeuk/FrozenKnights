@@ -8,6 +8,8 @@
 #include "GameFramework/Character.h"
 #include "Components/CapsuleComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Attribute/FKCharacterAttributeSet.h"
+#include "Character/FKCharacterBase.h"
 
 AFKTA_Trace::AFKTA_Trace()
 {
@@ -39,16 +41,31 @@ FGameplayAbilityTargetDataHandle AFKTA_Trace::MakeTargetData() const
 		return FGameplayAbilityTargetDataHandle();
 	}
 
+	const UFKCharacterAttributeSet* AttributeSet = ASC->GetSet<UFKCharacterAttributeSet>();
+	if (!AttributeSet)
+	{
+		return FGameplayAbilityTargetDataHandle();
+	}
+
 	FHitResult OutHitResult;
-	const float AttackRange = 100.0f;
-	const float AttackRadius = 150.0f;
+	const float AttackRange = AttributeSet->GetAttackRange();
+	const float AttackRadius = AttributeSet->GetAttackRadius();
 
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(UFKTA_Trace), false, Character);
 	const FVector Forward = Character->GetActorForwardVector();
 	const FVector Start = Character->GetActorLocation() + Forward * Character->GetCapsuleComponent()->GetScaledCapsuleRadius();
 	const FVector End = Start + Forward * AttackRange;
 
-	bool HitDetected = GetWorld()->SweepSingleByChannel(OutHitResult, Start, End, FQuat::Identity, CCHANNEL_FKACTION, FCollisionShape::MakeSphere(AttackRadius), Params);
+	ECollisionChannel ColChannel;
+	if (CastChecked<AFKCharacterBase>(Character)->IsPlayerCharacter())
+	{
+		ColChannel = CCHANNEL_FKACTION;
+	}
+	else
+	{
+		ColChannel = CCHANNEL_FKMOBATTACK;
+	}
+	bool HitDetected = GetWorld()->SweepSingleByChannel(OutHitResult, Start, End, FQuat::Identity, ColChannel, FCollisionShape::MakeSphere(AttackRadius), Params);
 
 	FGameplayAbilityTargetDataHandle DataHandle;
 	if (HitDetected)

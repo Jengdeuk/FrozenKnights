@@ -14,6 +14,8 @@
 
 AFKCharacterBase::AFKCharacterBase()
 {
+	bPlayerCharacter = false;
+
 	// Pawn
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -21,7 +23,6 @@ AFKCharacterBase::AFKCharacterBase()
 
 	// Capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_FKCAPSULE);
 
 	// Movement
 	GetCharacterMovement()->bOrientRotationToMovement = true;

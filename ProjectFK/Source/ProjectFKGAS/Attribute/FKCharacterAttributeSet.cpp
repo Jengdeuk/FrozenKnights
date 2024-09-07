@@ -7,6 +7,10 @@
 #include "Net/UnrealNetwork.h"
 
 UFKCharacterAttributeSet::UFKCharacterAttributeSet() :
+	AttackRange(100.0f),
+	MaxAttackRange(300.0f),
+	AttackRadius(150.0f),
+	MaxAttackRadius(300.0f),
 	AttackRate(30.0f),
 	MaxAttackRate(100.0f),
 	MaxHealth(100.0f),
@@ -73,10 +77,34 @@ void UFKCharacterAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(UFKCharacterAttributeSet, AttackRange);
+	DOREPLIFETIME(UFKCharacterAttributeSet, MaxAttackRange);
+	DOREPLIFETIME(UFKCharacterAttributeSet, AttackRadius);
+	DOREPLIFETIME(UFKCharacterAttributeSet, MaxAttackRadius);
 	DOREPLIFETIME(UFKCharacterAttributeSet, AttackRate);
 	DOREPLIFETIME(UFKCharacterAttributeSet, MaxAttackRate);
 	DOREPLIFETIME(UFKCharacterAttributeSet, Health);
 	DOREPLIFETIME(UFKCharacterAttributeSet, MaxHealth);
+}
+
+void UFKCharacterAttributeSet::OnRep_AttackRange(const FGameplayAttributeData& OldAttackRange) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UFKCharacterAttributeSet, AttackRange, OldAttackRange);
+}
+
+void UFKCharacterAttributeSet::OnRep_MaxAttackRange(const FGameplayAttributeData& OldMaxAttackRange) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UFKCharacterAttributeSet, MaxAttackRange, OldMaxAttackRange);
+}
+
+void UFKCharacterAttributeSet::OnRep_AttackRadius(const FGameplayAttributeData& OldAttackRadius) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UFKCharacterAttributeSet, AttackRadius, OldAttackRadius);
+}
+
+void UFKCharacterAttributeSet::OnRep_MaxAttackRadius(const FGameplayAttributeData& OldMaxAttackRadius) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UFKCharacterAttributeSet, MaxAttackRadius, OldMaxAttackRadius);
 }
 
 void UFKCharacterAttributeSet::OnRep_AttackRate(const FGameplayAttributeData& OldAttackRate) const

@@ -73,8 +73,14 @@ protected:
 	void OnRep_Dead();
 
 	UPROPERTY(ReplicatedUsing = "OnRep_Dead")
-	bool bDead;
+	uint8 bDead : 1;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UWidgetComponent> HpBar;
+
+public:
+	FORCEINLINE bool IsPlayerCharacter() const { return bPlayerCharacter; }
+
+protected:
+	uint8 bPlayerCharacter : 1;
 };

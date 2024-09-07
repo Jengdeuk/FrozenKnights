@@ -14,9 +14,16 @@
 #include "ProjectFK.h"
 #include "EngineUtils.h"
 #include "Components/WidgetComponent.h"
+#include "Physics/FKCollision.h"
+#include "Components/CapsuleComponent.h"
 
 AFKCharacterPlayer::AFKCharacterPlayer()
 {
+	bPlayerCharacter = true;
+
+	// Capsule
+	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_FKCAPSULE);
+
 	// Camera
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
