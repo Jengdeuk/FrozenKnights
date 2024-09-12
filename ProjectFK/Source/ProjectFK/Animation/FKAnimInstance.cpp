@@ -4,6 +4,7 @@
 #include "Animation/FKAnimInstance.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Character/FKCharacterBase.h"
 
 UFKAnimInstance::UFKAnimInstance()
 {
@@ -31,7 +32,7 @@ void UFKAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		Velocity = Movement->Velocity;
 		GroundSpeed = Velocity.Size2D();
 		bIsIdle = GroundSpeed < MovingThreshould;
-		bIsFalling = Movement->IsFalling();
+		//bIsFalling = Movement->IsFalling();
 		bIsJumping = bIsFalling & (Velocity.Z > JumpingThreshould);
 	}
 }

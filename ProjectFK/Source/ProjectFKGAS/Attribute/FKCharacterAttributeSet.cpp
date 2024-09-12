@@ -67,6 +67,7 @@ void UFKCharacterAttributeSet::PostGameplayEffectExecute(const FGameplayEffectMo
 	if (GetHealth() <= 0.0f && !bOutOfHealth)
 	{
 		Data.Target.AddLooseGameplayTag(FKTAG_CHARACTER_ISDEAD);
+		Data.Target.ForceReplication();
 		OnOutOfHealth.Broadcast();
 	}
 
