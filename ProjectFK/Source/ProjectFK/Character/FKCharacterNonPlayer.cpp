@@ -20,16 +20,14 @@ AFKCharacterNonPlayer::AFKCharacterNonPlayer()
 
 	AIControllerClass = AFKAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	OnMeshLoadCompleted.AddUObject(this, &AFKCharacterNonPlayer::OnInitMeshCompleted);
+	OnDead.AddUObject(this, &AFKCharacterNonPlayer::SetDead);
 }
 
-void AFKCharacterNonPlayer::BeginPlay()
+void AFKCharacterNonPlayer::PostInitializeComponents()
 {
-	Super::BeginPlay();
-}
-
-void AFKCharacterNonPlayer::PossessedBy(AController* NewController)
-{
-	Super::PossessedBy(NewController);
+	Super::PostInitializeComponents();
 
 	MeshHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(NPCMeshes[uint8(NPCClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::MeshLoadCompleted));
 	AnimHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(NPCAnimInstances[uint8(NPCClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AnimLoadCompleted));
@@ -41,9 +39,43 @@ void AFKCharacterNonPlayer::PossessedBy(AController* NewController)
 void AFKCharacterNonPlayer::SetDead()
 {
 	Super::SetDead();
+
+	AFKAIController* FKAIController = Cast<AFKAIController>(GetController());
+	if (FKAIController)
+	{
+		FKAIController->StopAI();
+	}
 }
 
 void AFKCharacterNonPlayer::OnInitMeshCompleted()
 {
 	HpBar->SetHiddenInGame(false);
+}
+
+float AFKCharacterNonPlayer::GetAIPatrolRadius()
+{
+	return 0.0f;
+}
+
+float AFKCharacterNonPlayer::GetAIDetectRange()
+{
+	return 0.0f;
+}
+
+float AFKCharacterNonPlayer::GetAIAttackRange()
+{
+	return 0.0f;
+}
+
+float AFKCharacterNonPlayer::GetAITurnSpeed()
+{
+	return 0.0f;
+}
+
+void AFKCharacterNonPlayer::SetAIAttackDelegate(const FAICharacterAttackFinished& InOnAttackFinished)
+{
+}
+
+void AFKCharacterNonPlayer::AttackByAI()
+{
 }

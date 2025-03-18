@@ -28,20 +28,21 @@ AFKGASCharacterNonPlayer::AFKGASCharacterNonPlayer()
 	}
 }
 
-UAbilitySystemComponent* AFKGASCharacterNonPlayer::GetAbilitySystemComponent() const
+void AFKGASCharacterNonPlayer::PostInitializeComponents()
 {
-	return ASC;
-}
-
-void AFKGASCharacterNonPlayer::PossessedBy(AController* NewController)
-{
-	Super::PossessedBy(NewController);
+	Super::PostInitializeComponents();
 
 	ASC->InitAbilityActorInfo(this, this);
 	AttributeSet->OnOutOfHealth.AddDynamic(this, &ThisClass::OnOutOfHealth);
 }
 
+UAbilitySystemComponent* AFKGASCharacterNonPlayer::GetAbilitySystemComponent() const
+{
+	return ASC;
+}
+
 void AFKGASCharacterNonPlayer::OnOutOfHealth()
 {
 	SetDead();
+	bDead = true;
 }

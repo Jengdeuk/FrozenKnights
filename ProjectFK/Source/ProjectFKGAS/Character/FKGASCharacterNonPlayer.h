@@ -18,8 +18,9 @@ class PROJECTFKGAS_API AFKGASCharacterNonPlayer : public AFKCharacterNonPlayer, 
 public:
 	AFKGASCharacterNonPlayer();
 
+public:
+	virtual void PostInitializeComponents() override;
 	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	virtual void PossessedBy(AController* NewController) override;
 
 	UFUNCTION()
 	virtual void OnOutOfHealth();
