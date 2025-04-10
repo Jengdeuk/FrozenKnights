@@ -11,6 +11,7 @@
 AFKGASCharacterNonPlayer::AFKGASCharacterNonPlayer()
 {
 	ASC = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("ASC"));
+	ASC->SetIsReplicated(true);
 	AttributeSet = CreateDefaultSubobject<UFKCharacterAttributeSet>(TEXT("AttributeSet"));
 
 	// UI
