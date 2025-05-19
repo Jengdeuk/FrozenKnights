@@ -18,8 +18,8 @@ AFKCharacterNonPlayer::AFKCharacterNonPlayer()
 
 	GetMesh()->SetHiddenInGame(true);
 
-	AIControllerClass = AFKAIController::StaticClass();
-	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+	//AIControllerClass = AFKAIController::StaticClass();
+	//AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	OnMeshLoadCompleted.AddUObject(this, &AFKCharacterNonPlayer::OnInitMeshCompleted);
 	OnDead.AddUObject(this, &AFKCharacterNonPlayer::SetDead);

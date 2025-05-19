@@ -4,6 +4,7 @@
 #include "Character/FKGASCharacterNonPlayer.h"
 #include "AbilitySystemComponent.h"
 #include "Attribute/FKCharacterAttributeSet.h"
+#include "AI/FKGASAIController.h"
 #include "UI/FKGASWidgetComponent.h"
 #include "UI/FKGASUserWidget.h"
 #include "UI/FKGASHpBarUserWidget.h"
@@ -13,6 +14,9 @@ AFKGASCharacterNonPlayer::AFKGASCharacterNonPlayer()
 	ASC = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("ASC"));
 	ASC->SetIsReplicated(true);
 	AttributeSet = CreateDefaultSubobject<UFKCharacterAttributeSet>(TEXT("AttributeSet"));
+
+	AIControllerClass = AFKGASAIController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	// UI
 	HpBar = CreateDefaultSubobject<UFKGASWidgetComponent>(TEXT("Widget"));

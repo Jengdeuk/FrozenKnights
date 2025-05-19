@@ -10,7 +10,17 @@ public class ProjectFKGAS : ModuleRules
 
         PublicIncludePaths.AddRange(new string[] { "ProjectFKGAS" });
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "NavigationSystem", "AIModule", "GameplayTasks" });
+        PublicDependencyModuleNames.AddRange(new string[] {
+            "Core",
+            "CoreUObject",
+            "Engine",
+            "InputCore",
+            "EnhancedInput",
+            "UMG",
+            "NavigationSystem",
+            "AIModule",
+            "GameplayTasks"
+        });
 
         PrivateDependencyModuleNames.AddRange(new string[] {
             "ProjectFK",
