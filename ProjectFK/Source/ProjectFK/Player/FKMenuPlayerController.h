@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Interfaces/OnlineSessionInterface.h"
 #include "FKMenuPlayerController.generated.h"
 
 /**
@@ -23,6 +24,14 @@ public:
 public:
 	void CreateServer();
 	void JoinServer();
+
+private:
+	void OnCreateSessionComplete(FName SessionName, bool bSuccess);
+	void OnFindSessionsComplete(bool bSuccess);
+	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+
+private:
+	TSharedPtr<class FOnlineSessionSearch> SessionSearch;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")

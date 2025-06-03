@@ -19,7 +19,9 @@ public class ProjectFK : ModuleRules
 			"UMG",
 			"NavigationSystem",
 			"AIModule",
-			"GameplayTasks"
+			"GameplayTasks",
+			"OnlineSubsystem",
+			"OnlineSubsystemSteam"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
