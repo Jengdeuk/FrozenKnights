@@ -25,10 +25,27 @@ public:
 	UFUNCTION()
 	virtual void OnOutOfHealth();
 
+	void NotifyComboActionEnd();
+
+// AI Section
+protected:
+	virtual float GetAIPatrolRadius() override;
+	virtual float GetAIDetectRange() override;
+	virtual float GetAIAttackRange() override;
+	virtual float GetAITurnSpeed() override;
+
+	virtual void SetAIAttackDelegate(const FAICharacterAttackFinished& InOnAttackFinished) override;
+	virtual void AttackByAI() override;
+
+	FAICharacterAttackFinished OnAttackFinished;
+
 protected:
 	UPROPERTY(EditAnywhere, Category = GAS)
 	TObjectPtr<class UAbilitySystemComponent> ASC;
 
 	UPROPERTY()
 	TObjectPtr<class UFKCharacterAttributeSet> AttributeSet;
+
+	UPROPERTY(EditAnywhere, Category = GAS)
+	TArray<TSubclassOf<class UGameplayAbility>> StartAbilities;
 };

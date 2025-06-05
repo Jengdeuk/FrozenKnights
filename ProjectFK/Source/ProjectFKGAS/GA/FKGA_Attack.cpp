@@ -5,6 +5,7 @@
 #include "Character/FKCharacterBase.h"
 #include "Character/FKCharacterPlayer.h"
 #include "Character/FKGASCharacterPlayer.h"
+#include "Character/FKGASCharacterNonPlayer.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/FKComboActionData.h"
@@ -20,14 +21,21 @@ void UFKGA_Attack::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 
 	AFKCharacterBase* FKCharacter = CastChecked<AFKCharacterBase>(ActorInfo->AvatarActor.Get());
 	CurrentComboData = FKCharacter->GetComboActionData();
-	FKCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	bPlayerCharacter = FKCharacter->IsPlayerCharacter();
+	if (bPlayerCharacter)
+	{
+		FKCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	}
 
 	UAbilityTask_PlayMontageAndWait* PlayAttackTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, TEXT("PlayAttack"), FKCharacter->GetAttackMontage(), 1.0f, GetNextSection());
 	PlayAttackTask->OnCompleted.AddDynamic(this, &UFKGA_Attack::OnCompleteCallback);
 	PlayAttackTask->OnInterrupted.AddDynamic(this, &UFKGA_Attack::OnInterruptedCallback);
 	PlayAttackTask->ReadyForActivation();
 
-	CastChecked<AFKCharacterPlayer>(FKCharacter)->ServerRPCPlayAttackMontage();
+	if (bPlayerCharacter)
+	{
+		CastChecked<AFKCharacterPlayer>(FKCharacter)->ServerRPCPlayAttackMontage();
+	}
 
 	StartComboTimer();
 }
@@ -53,8 +61,16 @@ void UFKGA_Attack::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGa
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
-	AFKCharacterBase* FKCharacter = CastChecked<AFKCharacterBase>(ActorInfo->AvatarActor.Get());
-	FKCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	if (bPlayerCharacter)
+	{
+		AFKCharacterBase* FKCharacter = CastChecked<AFKCharacterBase>(ActorInfo->AvatarActor.Get());
+		FKCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	}
+	else
+	{
+		AFKGASCharacterNonPlayer* FKCharacter = CastChecked<AFKGASCharacterNonPlayer>(ActorInfo->AvatarActor.Get());
+		FKCharacter->NotifyComboActionEnd();
+	}
 
 	CurrentComboData = nullptr;
 	CurrentCombo = 0;
@@ -102,10 +118,13 @@ void UFKGA_Attack::CheckComboInput()
 		FName NextSectionName = GetNextSection();
 		MontageJumpToSection(NextSectionName);
 
-		AFKCharacterPlayer* FKCharacter = CastChecked<AFKCharacterPlayer>(GetActorInfo().AvatarActor.Get());
-		if (FKCharacter)
+		if (bPlayerCharacter)
 		{
-			FKCharacter->ServerRPCMontageJumpToSection(NextSectionName);
+			AFKCharacterPlayer* FKCharacter = CastChecked<AFKCharacterPlayer>(GetActorInfo().AvatarActor.Get());
+			if (FKCharacter)
+			{
+				FKCharacter->ServerRPCMontageJumpToSection(NextSectionName);
+			}
 		}
 
 		StartComboTimer();

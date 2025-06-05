@@ -41,4 +41,5 @@ protected:
 	uint8 CurrentCombo = 0;
 	FTimerHandle ComboTimerHandle;
 	bool bHasNextComboInput = false;
+	bool bPlayerCharacter = true;
 };

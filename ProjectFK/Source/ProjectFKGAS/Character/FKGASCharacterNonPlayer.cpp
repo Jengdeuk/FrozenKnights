@@ -8,6 +8,7 @@
 #include "UI/FKGASWidgetComponent.h"
 #include "UI/FKGASUserWidget.h"
 #include "UI/FKGASHpBarUserWidget.h"
+#include "GA/FKGA_Attack.h"
 
 AFKGASCharacterNonPlayer::AFKGASCharacterNonPlayer()
 {
@@ -38,6 +39,12 @@ void AFKGASCharacterNonPlayer::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 	ASC->InitAbilityActorInfo(this, this);
+	for (const auto& StartAbility : StartAbilities)
+	{
+		FGameplayAbilitySpec StartSpec(StartAbility);
+		ASC->GiveAbility(StartSpec);
+	}
+
 	AttributeSet->OnOutOfHealth.AddDynamic(this, &ThisClass::OnOutOfHealth);
 }
 
@@ -50,4 +57,55 @@ void AFKGASCharacterNonPlayer::OnOutOfHealth()
 {
 	SetDead();
 	bDead = true;
+}
+
+void AFKGASCharacterNonPlayer::NotifyComboActionEnd()
+{
+	OnAttackFinished.ExecuteIfBound();
+}
+
+float AFKGASCharacterNonPlayer::GetAIPatrolRadius()
+{
+	return 800.0f;
+}
+
+float AFKGASCharacterNonPlayer::GetAIDetectRange()
+{
+	return 400.0f;
+}
+
+float AFKGASCharacterNonPlayer::GetAIAttackRange()
+{
+	return ASC->GetSet<UFKCharacterAttributeSet>()->GetAttackRange() + 2 * ASC->GetSet<UFKCharacterAttributeSet>()->GetAttackRadius();
+}
+
+float AFKGASCharacterNonPlayer::GetAITurnSpeed()
+{
+	return 0.0f;
+}
+
+void AFKGASCharacterNonPlayer::SetAIAttackDelegate(const FAICharacterAttackFinished& InOnAttackFinished)
+{
+	OnAttackFinished = InOnAttackFinished;
+}
+
+void AFKGASCharacterNonPlayer::AttackByAI()
+{
+	if (StartAbilities.Num() > 0 && StartAbilities[0])
+	{
+		TSubclassOf<UGameplayAbility> AbilityClass = StartAbilities[0];
+		FGameplayAbilitySpec* Spec = ASC->FindAbilitySpecFromClass(AbilityClass);
+
+		if (Spec)
+		{
+			if (Spec->IsActive())
+			{
+				ASC->AbilitySpecInputPressed(*Spec);
+			}
+			else
+			{
+				ASC->TryActivateAbility(Spec->Handle);
+			}
+		}
+	}
 }
