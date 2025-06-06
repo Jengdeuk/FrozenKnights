@@ -71,7 +71,7 @@ float AFKGASCharacterNonPlayer::GetAIPatrolRadius()
 
 float AFKGASCharacterNonPlayer::GetAIDetectRange()
 {
-	return 400.0f;
+	return 800.0f;
 }
 
 float AFKGASCharacterNonPlayer::GetAIAttackRange()
@@ -81,7 +81,7 @@ float AFKGASCharacterNonPlayer::GetAIAttackRange()
 
 float AFKGASCharacterNonPlayer::GetAITurnSpeed()
 {
-	return 0.0f;
+	return 2.0f;
 }
 
 void AFKGASCharacterNonPlayer::SetAIAttackDelegate(const FAICharacterAttackFinished& InOnAttackFinished)
