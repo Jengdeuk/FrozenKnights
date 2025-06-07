@@ -28,7 +28,7 @@ AFKGASCharacterNonPlayer::AFKGASCharacterNonPlayer()
 	{
 		HpBar->SetWidgetClass(HpBarWidgetRef.Class);
 		HpBar->SetWidgetSpace(EWidgetSpace::Screen);
-		HpBar->SetDrawSize(FVector2D(140.0f, 18.f));
+		HpBar->SetDrawSize(FVector2D(140.0f, 10.f));
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		HpBar->SetHiddenInGame(true);
 	}

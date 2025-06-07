@@ -27,7 +27,7 @@ AFKGASCharacterPlayer::AFKGASCharacterPlayer()
 	{
 		HpBar->SetWidgetClass(HpBarWidgetRef.Class);
 		HpBar->SetWidgetSpace(EWidgetSpace::Screen);
-		HpBar->SetDrawSize(FVector2D(140.0f, 18.f));
+		HpBar->SetDrawSize(FVector2D(140.0f, 10.f));
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		HpBar->SetHiddenInGame(true);
 	}
@@ -46,42 +46,7 @@ void AFKGASCharacterPlayer::BeginPlay()
 void AFKGASCharacterPlayer::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-
-	AFKGASPlayerState* GASPS = GetPlayerState<AFKGASPlayerState>();
-	if (GASPS)
-	{
-		ASC = GASPS->GetAbilitySystemComponent();
-		ASC->InitAbilityActorInfo(GASPS, this);
-
-		const UFKCharacterAttributeSet* CurrentAttributeSet = ASC->GetSet<UFKCharacterAttributeSet>();
-		if (CurrentAttributeSet)
-		{
-			CurrentAttributeSet->OnOutOfHealth.AddDynamic(this, &ThisClass::OnOutOfHealth);
-		}
-
-		for (const auto& StartAbility : StartAbilities)
-		{
-			FGameplayAbilitySpec StartSpec(StartAbility);
-			ASC->GiveAbility(StartSpec);
-		}
-
-		for (const auto& StartInputAbility : StartInputAbilities)
-		{
-			FGameplayAbilitySpec StartSpec(StartInputAbility.Value);
-			StartSpec.InputID = StartInputAbility.Key;
-			ASC->GiveAbility(StartSpec);
-		}
-
-		SetupGASInputComponent();
-
-		if (!IsLocallyControlled())
-		{
-			Cast<UFKGASHpBarUserWidget>(HpBar->GetWidget())->SetAbilitySystemComponent(this);
-		}
-
-		APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
-		PlayerController->ConsoleCommand(TEXT("showdebug abilitysystem"));
-	}
+	SetGAS();
 }
 
 void AFKGASCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -142,7 +107,11 @@ void AFKGASCharacterPlayer::OnOutOfHealth()
 void AFKGASCharacterPlayer::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
+	SetGAS();
+}
 
+void AFKGASCharacterPlayer::SetGAS()
+{
 	AFKGASPlayerState* GASPS = GetPlayerState<AFKGASPlayerState>();
 	if (GASPS)
 	{
@@ -170,10 +139,12 @@ void AFKGASCharacterPlayer::OnRep_PlayerState()
 
 		SetupGASInputComponent();
 
-		UFKGASHpBarUserWidget* HpBarUserWidget = Cast<UFKGASHpBarUserWidget>(HpBar->GetWidget());
-		if (HpBarUserWidget)
+		if (UUserWidget* Widget = HpBar->GetWidget())
 		{
-			HpBarUserWidget->SetAbilitySystemComponent(this);
+			if (UFKGASHpBarUserWidget* HpWidget = Cast<UFKGASHpBarUserWidget>(Widget))
+			{
+				HpWidget->SetAbilitySystemComponent(this);
+			}
 		}
 
 		if (IsLocallyControlled())
