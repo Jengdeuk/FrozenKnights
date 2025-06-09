@@ -21,13 +21,13 @@ AFKGASCharacterPlayer::AFKGASCharacterPlayer()
 	// UI
 	HpBar = CreateDefaultSubobject<UFKGASWidgetComponent>(TEXT("Widget"));
 	HpBar->SetupAttachment(GetMesh());
-	HpBar->SetRelativeLocation(FVector(0.0f, 0.0f, 215.0f));
+	HpBar->SetRelativeLocation(FVector(0.0f, 0.0f, 210.0f));
 	static ConstructorHelpers::FClassFinder<UUserWidget> HpBarWidgetRef(TEXT("/Game/FrozenKnights/UI/WBP_HpBar.WBP_HpBar_C"));
 	if (HpBarWidgetRef.Class)
 	{
 		HpBar->SetWidgetClass(HpBarWidgetRef.Class);
 		HpBar->SetWidgetSpace(EWidgetSpace::Screen);
-		HpBar->SetDrawSize(FVector2D(140.0f, 10.f));
+		HpBar->SetDrawSize(FVector2D(80.0f, 10.f));
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		HpBar->SetHiddenInGame(true);
 	}

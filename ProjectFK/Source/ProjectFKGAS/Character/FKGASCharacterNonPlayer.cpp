@@ -22,13 +22,13 @@ AFKGASCharacterNonPlayer::AFKGASCharacterNonPlayer()
 	// UI
 	HpBar = CreateDefaultSubobject<UFKGASWidgetComponent>(TEXT("Widget"));
 	HpBar->SetupAttachment(GetMesh());
-	HpBar->SetRelativeLocation(FVector(0.0f, 0.0f, 215.0f));
+	HpBar->SetRelativeLocation(FVector(0.0f, 0.0f, 245.0f));
 	static ConstructorHelpers::FClassFinder<UUserWidget> HpBarWidgetRef(TEXT("/Game/FrozenKnights/UI/WBP_HpBar.WBP_HpBar_C"));
 	if (HpBarWidgetRef.Class)
 	{
 		HpBar->SetWidgetClass(HpBarWidgetRef.Class);
 		HpBar->SetWidgetSpace(EWidgetSpace::Screen);
-		HpBar->SetDrawSize(FVector2D(140.0f, 10.f));
+		HpBar->SetDrawSize(FVector2D(75.0f, 10.f));
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		HpBar->SetHiddenInGame(true);
 	}
@@ -76,7 +76,7 @@ float AFKGASCharacterNonPlayer::GetAIDetectRange()
 
 float AFKGASCharacterNonPlayer::GetAIAttackRange()
 {
-	return ASC->GetSet<UFKCharacterAttributeSet>()->GetAttackRange() + 2 * ASC->GetSet<UFKCharacterAttributeSet>()->GetAttackRadius();
+	return ASC->GetSet<UFKCharacterAttributeSet>()->GetAttackRange() + ASC->GetSet<UFKCharacterAttributeSet>()->GetAttackRadius();
 }
 
 float AFKGASCharacterNonPlayer::GetAITurnSpeed()
