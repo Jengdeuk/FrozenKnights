@@ -20,6 +20,10 @@ public:
 public:
 	virtual void StartPlay() override;
 
-private:
+protected:
+	UPROPERTY()
+	TSubclassOf<class AFKCharacterNonPlayer> MonsterClass;
+
+	UPROPERTY()
 	TObjectPtr<class AFKMonsterPoolManager> MobPoolManager;
 };

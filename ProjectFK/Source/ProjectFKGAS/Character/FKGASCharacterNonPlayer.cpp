@@ -78,11 +78,6 @@ void AFKGASCharacterNonPlayer::Activate()
 void AFKGASCharacterNonPlayer::Deactivate()
 {
 	Super::Deactivate();
-
-	if (HasAuthority())
-	{
-		bDead = true;
-	}
 }
 
 float AFKGASCharacterNonPlayer::GetAIPatrolRadius()

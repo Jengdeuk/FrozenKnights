@@ -6,6 +6,18 @@
 #include "GameFramework/Actor.h"
 #include "FKMonsterPoolManager.generated.h"
 
+USTRUCT()
+struct FSpawnSlot
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FVector SpawnLocation;
+
+	UPROPERTY()
+	FTimerHandle SpawnTimerHandle;
+};
+
 UCLASS()
 class PROJECTFK_API AFKMonsterPoolManager : public AActor
 {
@@ -15,29 +27,22 @@ public:
 	AFKMonsterPoolManager();
 
 public:
-	template <typename T>
-	void InitPool(const int32 Size)
-	{
-		static_assert(TIsDerivedFrom<T, class AFKCharacterNonPlayer>::IsDerived, "T must derive from AFKCharacterNonPlayer");
+	UFUNCTION()
+	void InitPool(UClass* InMonsterClass, int32 Size);
 
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	UFUNCTION()
+	void DeferredSpawn(uint32 MonsterId);
 
-		for (int32 i = 0; i < Size; ++i)
-		{
-			if (AFKCharacterNonPlayer* NewMonster = GetWorld()->SpawnActor<T>(FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams))
-			{
-				NewMonster->Deactivate();
-				MonsterPool.Add(NewMonster);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("SpawnActor failed in MonsterPool"));
-			}
-		}
-	}
+	UFUNCTION()
+	void Spawn(uint32 MonsterId);
 
 private:
+	UPROPERTY()
+	TSubclassOf<class AFKCharacterNonPlayer> MonsterClass;
+
+	UPROPERTY()
+	TArray<FSpawnSlot> SpawnSlots;
+
 	UPROPERTY(EditAnywhere, Category = "Pool")
 	TArray<TObjectPtr<class AFKCharacterNonPlayer>> MonsterPool;
 };

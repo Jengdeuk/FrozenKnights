@@ -66,7 +66,7 @@ protected:
 // Resource Section
 public:
 	virtual void OnBindResourcesCompleted();
-	void CheckResourcesBindCompleted();
+	bool CheckResourcesBindCompleted();
 	void MeshLoadCompleted();
 	void AnimLoadCompleted();
 	void AttackMontageLoadCompleted();

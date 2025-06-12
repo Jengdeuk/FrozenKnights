@@ -66,7 +66,7 @@ void AFKCharacterNonPlayer::SetDead()
 			FKAIController->StopAI();
 		}
 
-		//GetWorld()->GetTimerManager().SetTimer(DeactiveTimerHandle, this, &ThisClass::Deactivate, 5.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(DeactiveTimerHandle, this, &ThisClass::Deactivate, 5.0f, false);
 	}
 }
 
@@ -76,7 +76,10 @@ void AFKCharacterNonPlayer::ActivatePoolableMonster(uint32 InMonsterId, AFKMonst
 	{
 		MonsterId = InMonsterId;
 		PoolManager = InPoolManager;
-		Activate();
+		if (CheckResourcesBindCompleted())
+		{
+			Activate();
+		}
 	}
 }
 
@@ -100,11 +103,18 @@ void AFKCharacterNonPlayer::Deactivate()
 
 	if (HasAuthority())
 	{
+		DeactiveTimerHandle.Invalidate();
+
 		AFKAIController* FKAIController = Cast<AFKAIController>(GetController());
 		if (FKAIController)
 		{
 			FKAIController->StopAI();
 		}
+
+		//if (PoolManager.IsValid())
+		//{
+		//	PoolManager->DeferredSpawn(MonsterId);
+		//}
 	}
 }
 

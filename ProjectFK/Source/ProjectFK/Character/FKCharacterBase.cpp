@@ -94,20 +94,23 @@ void AFKCharacterBase::SetCharacterControlData(const UFKCharacterControlData* Ch
 
 void AFKCharacterBase::OnBindResourcesCompleted()
 {
-	Activate();
+	if (IsActive())
+	{
+		Activate();
+	}
 }
 
-void AFKCharacterBase::CheckResourcesBindCompleted()
+bool AFKCharacterBase::CheckResourcesBindCompleted()
 {
 	for (const auto bResourceBind : bResourceBinds)
 	{
 		if (bResourceBind.Value == false)
 		{
-			return;
+			return false;
 		}
 	}
 
-	OnResourcesBindCompleted.Broadcast();
+	return true;
 }
 
 void AFKCharacterBase::MeshLoadCompleted()
@@ -120,7 +123,10 @@ void AFKCharacterBase::MeshLoadCompleted()
 		{
 			bResourceBinds[ResourceType] = true;
 			GetMesh()->SetSkeletalMesh(NewMesh);
-			CheckResourcesBindCompleted();
+			if (CheckResourcesBindCompleted())
+			{
+				OnResourcesBindCompleted.Broadcast();
+			}
 		}
 	}
 
@@ -137,7 +143,10 @@ void AFKCharacterBase::AnimLoadCompleted()
 		{
 			bResourceBinds[ResourceType] = true;
 			GetMesh()->SetAnimInstanceClass(NewAnim);
-			CheckResourcesBindCompleted();
+			if (CheckResourcesBindCompleted())
+			{
+				OnResourcesBindCompleted.Broadcast();
+			}
 		}
 	}
 
@@ -151,7 +160,10 @@ void AFKCharacterBase::AttackMontageLoadCompleted()
 	{
 		bResourceBinds[ResourceType] = true;
 		AttackMontage = Cast<UAnimMontage>(ResourceHandles[ResourceType]->GetLoadedAsset());
-		CheckResourcesBindCompleted();
+		if (CheckResourcesBindCompleted())
+		{
+			OnResourcesBindCompleted.Broadcast();
+		}
 	}
 
 	ResourceHandles[ResourceType]->ReleaseHandle();
@@ -164,7 +176,10 @@ void AFKCharacterBase::DeadMontageLoadCompleted()
 	{
 		bResourceBinds[ResourceType] = true;
 		DeadMontage = Cast<UAnimMontage>(ResourceHandles[ResourceType]->GetLoadedAsset());
-		CheckResourcesBindCompleted();
+		if (CheckResourcesBindCompleted())
+		{
+			OnResourcesBindCompleted.Broadcast();
+		}
 	}
 
 	ResourceHandles[ResourceType]->ReleaseHandle();
@@ -177,7 +192,10 @@ void AFKCharacterBase::ComboActionDataLoadCompleted()
 	{
 		bResourceBinds[ResourceType] = true;
 		ComboActionData = Cast<UFKComboActionData>(ResourceHandles[ResourceType]->GetLoadedAsset());
-		CheckResourcesBindCompleted();
+		if (CheckResourcesBindCompleted())
+		{
+			OnResourcesBindCompleted.Broadcast();
+		}
 	}
 
 	ResourceHandles[ResourceType]->ReleaseHandle();
