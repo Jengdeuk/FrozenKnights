@@ -7,7 +7,8 @@
 #include "Engine/StreamableManager.h"
 #include "FKCharacterBase.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FMeshLoadCompletedSignature);
+DECLARE_MULTICAST_DELEGATE(FActiveChangedSignature);
+DECLARE_MULTICAST_DELEGATE(FResourcesBindCompletedSignature);
 DECLARE_MULTICAST_DELEGATE(FDeadSignature);
 
 UENUM()
@@ -17,6 +18,17 @@ enum class ECharacterControlType : uint8
 	Quater
 };
 
+UENUM()
+enum class EResourceType : uint8
+{
+	Mesh,
+	AnimInstance,
+	AttackMontage,
+	DeadMontage,
+	ComboActionData,
+	Count
+};
+
 UCLASS()
 class PROJECTFK_API AFKCharacterBase : public ACharacter
 {
@@ -24,6 +36,12 @@ class PROJECTFK_API AFKCharacterBase : public ACharacter
 
 public:
 	AFKCharacterBase();
+
+public:
+	virtual void Activate();
+	virtual void Deactivate();
+
+	bool IsActive() const { return bActive; }
 
 public:
 	FORCEINLINE virtual class UAnimMontage* GetAttackMontage() const { return AttackMontage; }
@@ -45,21 +63,20 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> DeadMontage;
 
-// Character Mesh Section
+// Resource Section
 public:
+	virtual void OnBindResourcesCompleted();
+	void CheckResourcesBindCompleted();
 	void MeshLoadCompleted();
 	void AnimLoadCompleted();
 	void AttackMontageLoadCompleted();
 	void DeadMontageLoadCompleted();
 	void ComboActionDataLoadCompleted();
-	
+
 protected:
-	FMeshLoadCompletedSignature OnMeshLoadCompleted;
-	TSharedPtr<FStreamableHandle> MeshHandle;
-	TSharedPtr<FStreamableHandle> AnimHandle;
-	TSharedPtr<FStreamableHandle> AttackHandle;
-	TSharedPtr<FStreamableHandle> DeadHandle;
-	TSharedPtr<FStreamableHandle> ComboActionHandle;
+	FResourcesBindCompletedSignature OnResourcesBindCompleted;
+	TMap<EResourceType, TSharedPtr<FStreamableHandle>> ResourceHandles;
+	TMap<EResourceType, bool> bResourceBinds;
 
 // Dead Section
 protected:
@@ -83,4 +100,17 @@ public:
 
 protected:
 	uint8 bPlayerCharacter : 1;
+	FTimerHandle DeactiveTimerHandle;
+
+// Active Section
+private:
+	void ChangeActive();
+
+	FActiveChangedSignature OnActiveChanged;
+
+	UFUNCTION()
+	void OnRep_ActiveChanged();
+
+	UPROPERTY(ReplicatedUsing = "OnRep_ActiveChanged")
+	uint8 bActive : 1;
 };

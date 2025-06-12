@@ -28,5 +28,5 @@ void AFKPlayerState::OnRep_UpdatePlayerClass()
 		return;
 	}
 
-	Player->UpdateMeshFromPlayerState();
+	Player->BindCharacterResources();
 }

@@ -7,13 +7,17 @@
 #include "InputActionValue.h"
 #include "FKCharacterPlayer.generated.h"
 
-UCLASS(config=ProjectFK)
+UCLASS(config = ProjectFK)
 class PROJECTFK_API AFKCharacterPlayer : public AFKCharacterBase
 {
 	GENERATED_BODY()
 	
 public:
 	AFKCharacterPlayer();
+
+public:
+	virtual void Activate() override;
+	virtual void Deactivate() override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -72,28 +76,29 @@ protected:
 
 	ECharacterControlType CurrentCharacterControlType;
 
-// Character Mesh Section
-public:
-	void UpdateMeshFromPlayerState();
-	void OnInitMeshCompleted();
-	void EquipHelm();
-	virtual void OnRep_PlayerState() override;
-
+// Resource Section
 protected:
 	UPROPERTY(config)
-	TArray<FSoftObjectPath> PlayerMeshes;
+	TArray<FSoftObjectPath> Meshes;
 
 	UPROPERTY(config)
-	TArray<FSoftObjectPath> PlayerAnimInstances;
+	TArray<FSoftObjectPath> AnimInstances;
 
 	UPROPERTY(config)
-	TArray<FSoftObjectPath> PlayerAttackMontages;
+	TArray<FSoftObjectPath> AttackMontages;
 
 	UPROPERTY(config)
-	TArray<FSoftObjectPath> PlayerDeadMontages;
+	TArray<FSoftObjectPath> DeadMontages;
 
 	UPROPERTY(config)
-	TArray<FSoftObjectPath> PlayerComboActionData;
+	TArray<FSoftObjectPath> ComboActionDatas;
+
+// Character Mesh Section
+public:
+	void BindCharacterResources();
+	virtual void OnBindResourcesCompleted() override;
+	void EquipHelm();
+	virtual void OnRep_PlayerState() override;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment", Meta = (AllowPrivateAccess = "true"))

@@ -14,7 +14,7 @@ enum class ENPCClass : uint8
 	Boss
 };
 
-UCLASS(config=ProjectFK)
+UCLASS(config = ProjectFK)
 class PROJECTFK_API AFKCharacterNonPlayer : public AFKCharacterBase, public IFKCharacterAIInterface
 {
 	GENERATED_BODY()
@@ -26,27 +26,33 @@ protected:
 	virtual void PostInitializeComponents() override;
 	virtual void SetDead() override;
 
+public:
+	void ActivatePoolableMonster(uint32 InMonsterId, class AFKMonsterPoolManager* InPoolManager);
+	virtual void Activate() override;
+	virtual void Deactivate() override;
+
 protected:
 	ENPCClass NPCClass;
 
-public:
-	void OnInitMeshCompleted();
-
+// Resource Section
 protected:
 	UPROPERTY(config)
-	TArray<FSoftObjectPath> NPCMeshes;
+	TArray<FSoftObjectPath> Meshes;
 
 	UPROPERTY(config)
-	TArray<FSoftObjectPath> NPCAnimInstances;
+	TArray<FSoftObjectPath> AnimInstances;
 
 	UPROPERTY(config)
-	TArray<FSoftObjectPath> NPCAttackMontages;
+	TArray<FSoftObjectPath> AttackMontages;
 
 	UPROPERTY(config)
-	TArray<FSoftObjectPath> NPCDeadMontages;
+	TArray<FSoftObjectPath> DeadMontages;
 
 	UPROPERTY(config)
-	TArray<FSoftObjectPath> NPCComboActionData;
+	TArray<FSoftObjectPath> ComboActionDatas;
+
+public:
+	virtual void OnBindResourcesCompleted() override;
 
 // AI Section
 protected:
@@ -59,4 +65,8 @@ protected:
 	virtual void AttackByAI() override;
 
 	FAICharacterAttackFinished OnAttackFinished;
+
+private:
+	uint32 MonsterId;
+	TWeakObjectPtr<class AFKMonsterPoolManager> PoolManager;
 };

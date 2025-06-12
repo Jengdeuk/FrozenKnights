@@ -22,6 +22,7 @@ public:
 
 public:
 	void StartGame();
+	void PauseGame();
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerRPCSelectClass(const EPlayerClass& PlayerClass);

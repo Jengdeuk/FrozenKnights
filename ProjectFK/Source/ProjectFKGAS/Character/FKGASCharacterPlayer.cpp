@@ -9,7 +9,6 @@
 #include "Attribute/FKCharacterAttributeSet.h"
 #include "Net/UnrealNetwork.h"
 #include "EngineUtils.h"
-#include "ProjectFKGAS.h"
 #include "UI/FKGASWidgetComponent.h"
 #include "UI/FKGASUserWidget.h"
 #include "UI/FKGASHpBarUserWidget.h"
@@ -98,10 +97,10 @@ void AFKGASCharacterPlayer::GASInputReleased(int32 InputId)
 	}
 }
 
-void AFKGASCharacterPlayer::OnOutOfHealth()
+void AFKGASCharacterPlayer::OnOutOfHealth() // Server에서만 동작
 {
 	SetDead();
-	bDead = true;
+	bDead = true; // 클라로 죽은 상태 동기화
 }
 
 void AFKGASCharacterPlayer::OnRep_PlayerState()

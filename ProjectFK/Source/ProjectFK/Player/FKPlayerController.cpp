@@ -40,8 +40,13 @@ void AFKPlayerController::BeginPlay()
 void AFKPlayerController::StartGame()
 {
 	SetShowMouseCursor(false);
-	FInputModeGameOnly GameOnlyInputMode;
-	SetInputMode(GameOnlyInputMode);
+	SetInputMode(FInputModeGameOnly());
+}
+
+void AFKPlayerController::PauseGame()
+{
+	SetShowMouseCursor(true);
+	SetInputMode(FInputModeUIOnly());
 }
 
 bool AFKPlayerController::ServerRPCSelectClass_Validate(const EPlayerClass& PlayerClass)

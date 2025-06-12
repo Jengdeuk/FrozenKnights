@@ -53,15 +53,36 @@ UAbilitySystemComponent* AFKGASCharacterNonPlayer::GetAbilitySystemComponent() c
 	return ASC;
 }
 
-void AFKGASCharacterNonPlayer::OnOutOfHealth()
+void AFKGASCharacterNonPlayer::OnOutOfHealth() // Server에서만 동작
 {
 	SetDead();
-	bDead = true;
+	bDead = true; // 클라로 죽은 상태 동기화
 }
 
 void AFKGASCharacterNonPlayer::NotifyComboActionEnd()
 {
 	OnAttackFinished.ExecuteIfBound();
+}
+
+void AFKGASCharacterNonPlayer::Activate()
+{
+	Super::Activate();
+
+	if (HasAuthority())
+	{
+		bDead = false;
+		AttributeSet->SetHealth(AttributeSet->GetMaxHealth());
+	}
+}
+
+void AFKGASCharacterNonPlayer::Deactivate()
+{
+	Super::Deactivate();
+
+	if (HasAuthority())
+	{
+		bDead = true;
+	}
 }
 
 float AFKGASCharacterNonPlayer::GetAIPatrolRadius()

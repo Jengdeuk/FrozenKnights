@@ -27,6 +27,10 @@ public:
 
 	void NotifyComboActionEnd();
 
+public:
+	virtual void Activate() override;
+	virtual void Deactivate() override;
+
 // AI Section
 protected:
 	virtual float GetAIPatrolRadius() override;

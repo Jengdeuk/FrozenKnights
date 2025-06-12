@@ -65,15 +65,34 @@ AFKCharacterPlayer::AFKCharacterPlayer()
 	// Helm Component
 	Helm = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Helm"));
 	Helm->SetupAttachment(GetMesh(), TEXT("head"));
-
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> HelmMeshRef(TEXT("/Script/Engine.StaticMesh'/Game/ParagonGreystone/Characters/Heroes/Greystone/Skins/WhiteTiger/Meshes/SM_Greystone_TigerHelm.SM_Greystone_TigerHelm'"));
 	if (HelmMeshRef.Object)
 	{
 		HelmMesh = HelmMeshRef.Object;
 	}
+}
 
-	OnMeshLoadCompleted.AddUObject(this, &AFKCharacterPlayer::OnInitMeshCompleted);
-	OnDead.AddUObject(this, &AFKCharacterPlayer::SetDead);
+void AFKCharacterPlayer::Activate()
+{
+	Super::Activate();
+
+	AFKPlayerState* PS = GetPlayerState<AFKPlayerState>();
+	EPlayerClass PlayerClass = PS->GetPlayerClass();
+	if (PlayerClass == EPlayerClass::Knight)
+	{
+		EquipHelm();
+	}
+
+	if (IsLocallyControlled())
+	{
+		AFKPlayerController* PlayerController = CastChecked<AFKPlayerController>(GetController());
+		PlayerController->StartGame();
+	}
+}
+
+void AFKCharacterPlayer::Deactivate()
+{
+	Super::Deactivate();
 }
 
 void AFKCharacterPlayer::BeginPlay()
@@ -87,7 +106,7 @@ void AFKCharacterPlayer::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	UpdateMeshFromPlayerState();
+	BindCharacterResources();
 }
 
 void AFKCharacterPlayer::SetDead()
@@ -250,7 +269,7 @@ void AFKCharacterPlayer::ShoulderLook(const FInputActionValue& Value)
 	AddControllerPitchInput(LookAxisVector.Y);
 }
 
-void AFKCharacterPlayer::UpdateMeshFromPlayerState()
+void AFKCharacterPlayer::BindCharacterResources()
 {
 	AFKPlayerState* PS = GetPlayerState<AFKPlayerState>();
 	EPlayerClass PlayerClass = PS->GetPlayerClass();
@@ -258,30 +277,41 @@ void AFKCharacterPlayer::UpdateMeshFromPlayerState()
 	{
 		return;
 	}
-	
-	MeshHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(PlayerMeshes[uint8(PlayerClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::MeshLoadCompleted));
-	AnimHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(PlayerAnimInstances[uint8(PlayerClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AnimLoadCompleted));
-	AttackHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(PlayerAttackMontages[uint8(PlayerClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AttackMontageLoadCompleted));
-	DeadHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(PlayerDeadMontages[uint8(PlayerClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::DeadMontageLoadCompleted));
-	ComboActionHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(PlayerComboActionData[uint8(PlayerClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::ComboActionDataLoadCompleted));
+
+	bResourceBinds.FindOrAdd(EResourceType::Mesh) = false;
+	ResourceHandles.FindOrAdd(EResourceType::Mesh) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		Meshes[uint8(PlayerClass)],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::MeshLoadCompleted)
+	);
+
+	bResourceBinds.FindOrAdd(EResourceType::AnimInstance) = false;
+	ResourceHandles.FindOrAdd(EResourceType::AnimInstance) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		AnimInstances[uint8(PlayerClass)],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AnimLoadCompleted)
+	);
+
+	bResourceBinds.FindOrAdd(EResourceType::AttackMontage) = false;
+	ResourceHandles.FindOrAdd(EResourceType::AttackMontage) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		AttackMontages[uint8(PlayerClass)],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AttackMontageLoadCompleted)
+	);
+
+	bResourceBinds.FindOrAdd(EResourceType::DeadMontage) = false;
+	ResourceHandles.FindOrAdd(EResourceType::DeadMontage) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		DeadMontages[uint8(PlayerClass)],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::DeadMontageLoadCompleted)
+	);
+
+	bResourceBinds.FindOrAdd(EResourceType::ComboActionData) = false;
+	ResourceHandles.FindOrAdd(EResourceType::ComboActionData) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		ComboActionDatas[uint8(PlayerClass)],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::ComboActionDataLoadCompleted)
+	);
 }
 
-void AFKCharacterPlayer::OnInitMeshCompleted()
+void AFKCharacterPlayer::OnBindResourcesCompleted()
 {
-	AFKPlayerState* PS = GetPlayerState<AFKPlayerState>();
-	EPlayerClass PlayerClass = PS->GetPlayerClass();
-	if (PlayerClass == EPlayerClass::Knight)
-	{
-		EquipHelm();
-	}
-
-	HpBar->SetHiddenInGame(false);
-
-	if (IsLocallyControlled())
-	{
-		AFKPlayerController* PlayerController = CastChecked<AFKPlayerController>(GetController());
-		PlayerController->StartGame();
-	}
+	Super::OnBindResourcesCompleted();
 }
 
 void AFKCharacterPlayer::EquipHelm()
@@ -294,5 +324,5 @@ void AFKCharacterPlayer::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
-	UpdateMeshFromPlayerState();
+	BindCharacterResources();
 }

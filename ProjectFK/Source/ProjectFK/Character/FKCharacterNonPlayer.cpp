@@ -8,6 +8,8 @@
 #include "Components/CapsuleComponent.h"
 #include "AI/FKAIController.h"
 #include "Components/WidgetComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Game/FKMonsterPoolManager.h"
 
 AFKCharacterNonPlayer::AFKCharacterNonPlayer()
 {
@@ -15,41 +17,100 @@ AFKCharacterNonPlayer::AFKCharacterNonPlayer()
 
 	// Capsule
 	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_FKMOBCAPSULE);
-
-	GetMesh()->SetHiddenInGame(true);
-
-	//AIControllerClass = AFKAIController::StaticClass();
-	//AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-
-	OnMeshLoadCompleted.AddUObject(this, &AFKCharacterNonPlayer::OnInitMeshCompleted);
-	OnDead.AddUObject(this, &AFKCharacterNonPlayer::SetDead);
 }
 
 void AFKCharacterNonPlayer::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	MeshHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(NPCMeshes[uint8(NPCClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::MeshLoadCompleted));
-	AnimHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(NPCAnimInstances[uint8(NPCClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AnimLoadCompleted));
-	AttackHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(NPCAttackMontages[uint8(NPCClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AttackMontageLoadCompleted));
-	DeadHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(NPCDeadMontages[uint8(NPCClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::DeadMontageLoadCompleted));
-	ComboActionHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(NPCComboActionData[uint8(NPCClass)], FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::ComboActionDataLoadCompleted));
+	bResourceBinds.FindOrAdd(EResourceType::Mesh) = false;
+	ResourceHandles.FindOrAdd(EResourceType::Mesh) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		Meshes[uint8(NPCClass)],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::MeshLoadCompleted)
+	);
+
+	bResourceBinds.FindOrAdd(EResourceType::AnimInstance) = false;
+	ResourceHandles.FindOrAdd(EResourceType::AnimInstance) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		AnimInstances[uint8(NPCClass)],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AnimLoadCompleted)
+	);
+
+	bResourceBinds.FindOrAdd(EResourceType::AttackMontage) = false;
+	ResourceHandles.FindOrAdd(EResourceType::AttackMontage) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		AttackMontages[uint8(NPCClass)],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AttackMontageLoadCompleted)
+	);
+
+	bResourceBinds.FindOrAdd(EResourceType::DeadMontage) = false;
+	ResourceHandles.FindOrAdd(EResourceType::DeadMontage) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		DeadMontages[uint8(NPCClass)],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::DeadMontageLoadCompleted)
+	);
+
+	bResourceBinds.FindOrAdd(EResourceType::ComboActionData) = false;
+	ResourceHandles.FindOrAdd(EResourceType::ComboActionData) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		ComboActionDatas[uint8(NPCClass)],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::ComboActionDataLoadCompleted)
+	);
 }
 
 void AFKCharacterNonPlayer::SetDead()
 {
 	Super::SetDead();
 
-	AFKAIController* FKAIController = Cast<AFKAIController>(GetController());
-	if (FKAIController)
+	if (HasAuthority())
 	{
-		FKAIController->StopAI();
+		AFKAIController* FKAIController = Cast<AFKAIController>(GetController());
+		if (FKAIController)
+		{
+			FKAIController->StopAI();
+		}
+
+		//GetWorld()->GetTimerManager().SetTimer(DeactiveTimerHandle, this, &ThisClass::Deactivate, 5.0f, false);
 	}
 }
 
-void AFKCharacterNonPlayer::OnInitMeshCompleted()
+void AFKCharacterNonPlayer::ActivatePoolableMonster(uint32 InMonsterId, AFKMonsterPoolManager* InPoolManager)
 {
-	HpBar->SetHiddenInGame(false);
+	if (HasAuthority() && InPoolManager)
+	{
+		MonsterId = InMonsterId;
+		PoolManager = InPoolManager;
+		Activate();
+	}
+}
+
+void AFKCharacterNonPlayer::Activate()
+{
+	Super::Activate();
+
+	if (HasAuthority())
+	{
+		AFKAIController* FKAIController = Cast<AFKAIController>(GetController());
+		if (FKAIController)
+		{
+			FKAIController->RunAI();
+		}
+	}
+}
+
+void AFKCharacterNonPlayer::Deactivate()
+{
+	Super::Deactivate();
+
+	if (HasAuthority())
+	{
+		AFKAIController* FKAIController = Cast<AFKAIController>(GetController());
+		if (FKAIController)
+		{
+			FKAIController->StopAI();
+		}
+	}
+}
+
+void AFKCharacterNonPlayer::OnBindResourcesCompleted()
+{
+	Super::OnBindResourcesCompleted();
 }
 
 float AFKCharacterNonPlayer::GetAIPatrolRadius()

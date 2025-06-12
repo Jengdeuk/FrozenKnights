@@ -44,6 +44,41 @@ AFKCharacterBase::AFKCharacterBase()
 
 	bReplicates = true;
 	bDead = false;
+	bActive = true;
+
+	OnResourcesBindCompleted.AddUObject(this, &ThisClass::OnBindResourcesCompleted);
+	OnActiveChanged.AddUObject(this, &ThisClass::ChangeActive);
+	OnDead.AddUObject(this, &ThisClass::SetDead);
+}
+
+void AFKCharacterBase::Activate()
+{
+	if (HasAuthority())
+	{
+		bActive = true;
+	}
+
+	SetActorHiddenInGame(false);
+	HpBar->SetHiddenInGame(false);
+	GetMesh()->SetHiddenInGame(false);
+	SetActorEnableCollision(true);
+	SetActorTickEnabled(true);
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+}
+
+void AFKCharacterBase::Deactivate()
+{
+	if (HasAuthority())
+	{
+		bActive = false;
+	}
+
+	SetActorHiddenInGame(true);
+	HpBar->SetHiddenInGame(true);
+	GetMesh()->SetHiddenInGame(true);
+	SetActorEnableCollision(false);
+	SetActorTickEnabled(false);
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 }
 
 void AFKCharacterBase::SetCharacterControlData(const UFKCharacterControlData* CharacterControlData)
@@ -57,64 +92,95 @@ void AFKCharacterBase::SetCharacterControlData(const UFKCharacterControlData* Ch
 	GetCharacterMovement()->RotationRate = CharacterControlData->RotationRate;
 }
 
-void AFKCharacterBase::MeshLoadCompleted()
+void AFKCharacterBase::OnBindResourcesCompleted()
 {
-	if (MeshHandle.IsValid())
+	Activate();
+}
+
+void AFKCharacterBase::CheckResourcesBindCompleted()
+{
+	for (const auto bResourceBind : bResourceBinds)
 	{
-		USkeletalMesh* NewMesh = Cast<USkeletalMesh>(MeshHandle->GetLoadedAsset());
-		if (NewMesh)
+		if (bResourceBind.Value == false)
 		{
-			GetMesh()->SetSkeletalMesh(NewMesh);
+			return;
 		}
 	}
 
-	MeshHandle->ReleaseHandle();
+	OnResourcesBindCompleted.Broadcast();
+}
+
+void AFKCharacterBase::MeshLoadCompleted()
+{
+	EResourceType ResourceType = EResourceType::Mesh;
+	if (ResourceHandles[ResourceType].IsValid())
+	{
+		USkeletalMesh* NewMesh = Cast<USkeletalMesh>(ResourceHandles[ResourceType]->GetLoadedAsset());
+		if (NewMesh)
+		{
+			bResourceBinds[ResourceType] = true;
+			GetMesh()->SetSkeletalMesh(NewMesh);
+			CheckResourcesBindCompleted();
+		}
+	}
+
+	ResourceHandles[ResourceType]->ReleaseHandle();
 }
 
 void AFKCharacterBase::AnimLoadCompleted()
 {
-	if (AnimHandle.IsValid())
+	EResourceType ResourceType = EResourceType::AnimInstance;
+	if (ResourceHandles[ResourceType].IsValid())
 	{
-		UClass* NewAnim = Cast<UClass>(AnimHandle->GetLoadedAsset());
+		UClass* NewAnim = Cast<UClass>(ResourceHandles[ResourceType]->GetLoadedAsset());
 		if (NewAnim)
 		{
+			bResourceBinds[ResourceType] = true;
 			GetMesh()->SetAnimInstanceClass(NewAnim);
-			GetMesh()->SetHiddenInGame(false);
-			OnMeshLoadCompleted.Broadcast();
+			CheckResourcesBindCompleted();
 		}
 	}
 
-	AnimHandle->ReleaseHandle();
+	ResourceHandles[ResourceType]->ReleaseHandle();
 }
 
 void AFKCharacterBase::AttackMontageLoadCompleted()
 {
-	if (AttackHandle.IsValid())
+	EResourceType ResourceType = EResourceType::AttackMontage;
+	if (ResourceHandles[ResourceType].IsValid())
 	{
-		AttackMontage = Cast<UAnimMontage>(AttackHandle->GetLoadedAsset());
+		bResourceBinds[ResourceType] = true;
+		AttackMontage = Cast<UAnimMontage>(ResourceHandles[ResourceType]->GetLoadedAsset());
+		CheckResourcesBindCompleted();
 	}
 
-	AttackHandle->ReleaseHandle();
+	ResourceHandles[ResourceType]->ReleaseHandle();
 }
 
 void AFKCharacterBase::DeadMontageLoadCompleted()
 {
-	if (DeadHandle.IsValid())
+	EResourceType ResourceType = EResourceType::DeadMontage;
+	if (ResourceHandles[ResourceType].IsValid())
 	{
-		DeadMontage = Cast<UAnimMontage>(DeadHandle->GetLoadedAsset());
+		bResourceBinds[ResourceType] = true;
+		DeadMontage = Cast<UAnimMontage>(ResourceHandles[ResourceType]->GetLoadedAsset());
+		CheckResourcesBindCompleted();
 	}
 
-	DeadHandle->ReleaseHandle();
+	ResourceHandles[ResourceType]->ReleaseHandle();
 }
 
 void AFKCharacterBase::ComboActionDataLoadCompleted()
 {
-	if (ComboActionHandle.IsValid())
+	EResourceType ResourceType = EResourceType::ComboActionData;
+	if (ResourceHandles[ResourceType].IsValid())
 	{
-		ComboActionData = Cast<UFKComboActionData>(ComboActionHandle->GetLoadedAsset());
+		bResourceBinds[ResourceType] = true;
+		ComboActionData = Cast<UFKComboActionData>(ResourceHandles[ResourceType]->GetLoadedAsset());
+		CheckResourcesBindCompleted();
 	}
 
-	ComboActionHandle->ReleaseHandle();
+	ResourceHandles[ResourceType]->ReleaseHandle();
 }
 
 void AFKCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -122,6 +188,7 @@ void AFKCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AFKCharacterBase, bDead);
+	DOREPLIFETIME(AFKCharacterBase, bActive);
 }
 
 void AFKCharacterBase::SetDead()
@@ -141,5 +208,25 @@ void AFKCharacterBase::PlayDeadAnimation()
 
 void AFKCharacterBase::OnRep_Dead()
 {
-	OnDead.Broadcast();
+	if (bDead)
+	{
+		OnDead.Broadcast();
+	}
+}
+
+void AFKCharacterBase::ChangeActive()
+{
+	if (bActive)
+	{
+		Activate();
+	}
+	else
+	{
+		Deactivate();
+	}
+}
+
+void AFKCharacterBase::OnRep_ActiveChanged()
+{
+	OnActiveChanged.Broadcast();
 }
