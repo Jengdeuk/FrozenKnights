@@ -16,6 +16,6 @@ void AFKGameMode::StartPlay()
 
 	if (MobPoolManager && MonsterClass)
 	{
-		MobPoolManager->InitPool(MonsterClass, 8);
+		MobPoolManager->InitPool(MonsterClass, 9);
 	}
 }

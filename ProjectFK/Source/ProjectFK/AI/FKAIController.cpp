@@ -32,6 +32,11 @@ void AFKAIController::StopAI()
 	}
 }
 
+void AFKAIController::SetHomePos(FVector InPosition)
+{
+	Blackboard->SetValueAsVector(BBKEY_HOMEPOS, InPosition);
+}
+
 void AFKAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);

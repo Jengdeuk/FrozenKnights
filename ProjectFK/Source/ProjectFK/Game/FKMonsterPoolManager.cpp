@@ -14,8 +14,8 @@ AFKMonsterPoolManager::AFKMonsterPoolManager()
 
 	SpawnSlots.Add({ FVector(-1190, 940, -430), FTimerHandle() });
 
-	SpawnSlots.Add({ FVector(-530, 0, -210), FTimerHandle() });
-	SpawnSlots.Add({ FVector(-2310, 0, -210), FTimerHandle() });
+	SpawnSlots.Add({ FVector(-2310, 0, -50), FTimerHandle() });
+	SpawnSlots.Add({ FVector(-530, 0, -50), FTimerHandle() });
 }
 
 void AFKMonsterPoolManager::InitPool(UClass* InMonsterClass, int32 Size)
@@ -52,6 +52,7 @@ void AFKMonsterPoolManager::Spawn(uint32 MonsterId)
 		{
 			Monster->ActivatePoolableMonster(MonsterId, this);
 			Monster->SetActorLocation(SpawnSlots[MonsterId].SpawnLocation);
+			Monster->SetHomePos(SpawnSlots[MonsterId].SpawnLocation);
 			return;
 		}
 	}
@@ -63,6 +64,7 @@ void AFKMonsterPoolManager::Spawn(uint32 MonsterId)
 	{
 		NewMonster->ActivatePoolableMonster(MonsterId, this);
 		NewMonster->SetActorLocation(SpawnSlots[MonsterId].SpawnLocation);
+		NewMonster->SetHomePos(SpawnSlots[MonsterId].SpawnLocation);
 		MonsterPool.Add(NewMonster);
 	}
 }

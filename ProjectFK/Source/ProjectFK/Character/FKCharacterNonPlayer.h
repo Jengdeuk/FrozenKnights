@@ -28,6 +28,7 @@ protected:
 
 public:
 	void ActivatePoolableMonster(uint32 InMonsterId, class AFKMonsterPoolManager* InPoolManager);
+	void SetHomePos(FVector InPosition);
 	virtual void Activate() override;
 	virtual void Deactivate() override;
 

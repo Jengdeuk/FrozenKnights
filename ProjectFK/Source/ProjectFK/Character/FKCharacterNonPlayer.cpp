@@ -17,6 +17,9 @@ AFKCharacterNonPlayer::AFKCharacterNonPlayer()
 
 	// Capsule
 	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_FKMOBCAPSULE);
+
+	// Movement
+	GetCharacterMovement()->MaxWalkSpeed = 400.f;
 }
 
 void AFKCharacterNonPlayer::PostInitializeComponents()
@@ -80,6 +83,15 @@ void AFKCharacterNonPlayer::ActivatePoolableMonster(uint32 InMonsterId, AFKMonst
 		{
 			Activate();
 		}
+	}
+}
+
+void AFKCharacterNonPlayer::SetHomePos(FVector InPosition)
+{
+	AFKAIController* FKAIController = Cast<AFKAIController>(GetController());
+	if (FKAIController)
+	{
+		FKAIController->SetHomePos(InPosition);
 	}
 }
 

@@ -220,8 +220,11 @@ void AFKCharacterBase::SetDead()
 void AFKCharacterBase::PlayDeadAnimation()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	AnimInstance->StopAllMontages(0.0f);
-	AnimInstance->Montage_Play(DeadMontage, 1.0f);
+	if (AnimInstance)
+	{
+		AnimInstance->StopAllMontages(0.0f);
+		AnimInstance->Montage_Play(DeadMontage, 1.0f);
+	}
 }
 
 void AFKCharacterBase::OnRep_Dead()

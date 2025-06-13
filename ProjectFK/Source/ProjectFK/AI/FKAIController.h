@@ -17,8 +17,10 @@ class PROJECTFK_API AFKAIController : public AAIController
 public:
 	AFKAIController();
 
+public:
 	void RunAI();
 	void StopAI();
+	void SetHomePos(FVector InPosition);
 
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
