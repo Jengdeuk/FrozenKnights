@@ -64,6 +64,7 @@ void AFKCharacterBase::Activate()
 	SetActorEnableCollision(true);
 	SetActorTickEnabled(true);
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	ResetCharacterAnimation();
 }
 
 void AFKCharacterBase::Deactivate()
@@ -215,6 +216,15 @@ void AFKCharacterBase::SetDead()
 	PlayDeadAnimation();
 	SetActorEnableCollision(false);
 	HpBar->SetHiddenInGame(true);
+}
+
+void AFKCharacterBase::ResetCharacterAnimation()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->StopAllMontages(0.0f);
+	}
 }
 
 void AFKCharacterBase::PlayDeadAnimation()

@@ -70,6 +70,11 @@ void AFKCharacterNonPlayer::SetDead()
 		}
 
 		GetWorld()->GetTimerManager().SetTimer(DeactiveTimerHandle, this, &ThisClass::Deactivate, 5.0f, false);
+
+		if (PoolManager.IsValid())
+		{
+			PoolManager->DeferredSpawn(MonsterId);
+		}
 	}
 }
 
@@ -122,11 +127,6 @@ void AFKCharacterNonPlayer::Deactivate()
 		{
 			FKAIController->StopAI();
 		}
-
-		//if (PoolManager.IsValid())
-		//{
-		//	PoolManager->DeferredSpawn(MonsterId);
-		//}
 	}
 }
 

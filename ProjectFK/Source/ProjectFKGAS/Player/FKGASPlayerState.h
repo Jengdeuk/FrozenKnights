@@ -17,6 +17,9 @@ public:
 	AFKGASPlayerState();
 
 public:
+	virtual void BeginPlay() override;
+
+public:
 	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 protected:

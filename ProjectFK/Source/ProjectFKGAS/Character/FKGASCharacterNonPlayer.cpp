@@ -9,6 +9,7 @@
 #include "UI/FKGASUserWidget.h"
 #include "UI/FKGASHpBarUserWidget.h"
 #include "GA/FKGA_Attack.h"
+#include "Tag/FKGameplayTag.h"
 
 AFKGASCharacterNonPlayer::AFKGASCharacterNonPlayer()
 {
@@ -38,14 +39,7 @@ void AFKGASCharacterNonPlayer::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	ASC->InitAbilityActorInfo(this, this);
-	for (const auto& StartAbility : StartAbilities)
-	{
-		FGameplayAbilitySpec StartSpec(StartAbility);
-		ASC->GiveAbility(StartSpec);
-	}
-
-	AttributeSet->OnOutOfHealth.AddDynamic(this, &ThisClass::OnOutOfHealth);
+	SetGAS();
 }
 
 UAbilitySystemComponent* AFKGASCharacterNonPlayer::GetAbilitySystemComponent() const
@@ -71,6 +65,7 @@ void AFKGASCharacterNonPlayer::Activate()
 	if (HasAuthority())
 	{
 		bDead = false;
+		ASC->RemoveLooseGameplayTag(FKTAG_CHARACTER_ISDEAD);
 		AttributeSet->SetHealth(AttributeSet->GetMaxHealth());
 	}
 }
@@ -124,4 +119,16 @@ void AFKGASCharacterNonPlayer::AttackByAI()
 			}
 		}
 	}
+}
+
+void AFKGASCharacterNonPlayer::SetGAS()
+{
+	ASC->InitAbilityActorInfo(this, this);
+	for (const auto& StartAbility : StartAbilities)
+	{
+		FGameplayAbilitySpec StartSpec(StartAbility);
+		ASC->GiveAbility(StartSpec);
+	}
+
+	AttributeSet->OnOutOfHealth.AddDynamic(this, &ThisClass::OnOutOfHealth);
 }

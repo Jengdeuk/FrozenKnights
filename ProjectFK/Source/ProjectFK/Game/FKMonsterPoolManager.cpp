@@ -39,7 +39,7 @@ void AFKMonsterPoolManager::DeferredSpawn(uint32 MonsterId)
 {
 	FTimerDelegate SpawnDelegate;
 	SpawnDelegate.BindUFunction(this, FName("Spawn"), MonsterId);
-	GetWorld()->GetTimerManager().SetTimer(SpawnSlots[MonsterId].SpawnTimerHandle, SpawnDelegate, 5.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(SpawnSlots[MonsterId].SpawnTimerHandle, SpawnDelegate, 10.0f, false);
 }
 
 void AFKMonsterPoolManager::Spawn(uint32 MonsterId)

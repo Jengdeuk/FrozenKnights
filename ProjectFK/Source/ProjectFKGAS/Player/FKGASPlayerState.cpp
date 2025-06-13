@@ -12,6 +12,14 @@ AFKGASPlayerState::AFKGASPlayerState()
 	AttributeSet = CreateDefaultSubobject<UFKCharacterAttributeSet>(TEXT("AttributeSet"));
 }
 
+void AFKGASPlayerState::BeginPlay()
+{
+	Super::BeginPlay();
+
+	AttributeSet->SetMaxHealth(10000.0f);
+	AttributeSet->SetHealth(AttributeSet->GetMaxHealth());
+}
+
 UAbilitySystemComponent* AFKGASPlayerState::GetAbilitySystemComponent() const
 {
 	return ASC;

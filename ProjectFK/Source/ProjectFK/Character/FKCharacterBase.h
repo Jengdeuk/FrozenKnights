@@ -82,6 +82,7 @@ protected:
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void SetDead();
+	void ResetCharacterAnimation();
 	void PlayDeadAnimation();
 
 	FDeadSignature OnDead;
