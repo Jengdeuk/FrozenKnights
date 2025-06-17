@@ -245,6 +245,17 @@ void AFKCharacterBase::OnRep_Dead()
 	}
 }
 
+float AFKCharacterBase::GetRespawnRemainingTime() const
+{
+	if (bIsWaitingForRespawn == false)
+	{
+		return 0.0f;
+	}
+
+	float Elapsed = GetWorld()->GetTimeSeconds() - RespawnStartTime;
+	return FMath::Clamp(RespawnDuration - Elapsed, 0.0f, RespawnDuration);
+}
+
 void AFKCharacterBase::ChangeActive()
 {
 	if (bActive)

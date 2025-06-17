@@ -5,17 +5,24 @@
 #include "Character/FKCharacterPlayer.h"
 #include "Player/FKPlayerState.h"
 #include "UI/FKClassSelectWidget.h"
+#include "UI/FKRespawnWidget.h"
 #include "EngineUtils.h"
 
 AFKPlayerController::AFKPlayerController()
 {
+	bReplicates = true;
+
 	static ConstructorHelpers::FClassFinder<UFKClassSelectWidget> ClassSelectUIClassRef(TEXT("/Game/FrozenKnights/UI/WBP_ClassSelect.WBP_ClassSelect_C"));
 	if (ClassSelectUIClassRef.Class)
 	{
 		ClassSelectUIClass = ClassSelectUIClassRef.Class;
 	}
 
-	bReplicates = true;
+	static ConstructorHelpers::FClassFinder<UFKRespawnWidget> RespawnUIClassRef(TEXT("/Game/FrozenKnights/UI/WBP_Respawn.WBP_Respawn_C"));
+	if (RespawnUIClassRef.Class)
+	{
+		RespawnUIClass = RespawnUIClassRef.Class;
+	}
 }
 
 void AFKPlayerController::BeginPlay()
@@ -33,8 +40,24 @@ void AFKPlayerController::BeginPlay()
 		ClassSelectUI->AddToViewport();
 	}
 
+	RespawnUI = CreateWidget<UFKRespawnWidget>(this, RespawnUIClass);
+	if (RespawnUI)
+	{
+		RespawnUI->SetOwnerCharacter(Cast<AFKCharacterPlayer>(GetPawn()));
+		RespawnUI->AddToViewport();
+		RespawnUI->SetVisibility(ESlateVisibility::Hidden);
+	}
+
 	SetShowMouseCursor(true);
 	SetInputMode(FInputModeUIOnly());
+}
+
+void AFKPlayerController::PreparingToReturn()
+{
+	if (RespawnUI)
+	{
+		RespawnUI->SetVisibility(ESlateVisibility::Visible);
+	}
 }
 
 void AFKPlayerController::StartGame()

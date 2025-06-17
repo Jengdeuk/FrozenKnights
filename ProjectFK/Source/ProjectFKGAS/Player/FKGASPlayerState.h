@@ -18,6 +18,7 @@ public:
 
 public:
 	virtual void BeginPlay() override;
+	void ResetHealth();
 
 public:
 	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;

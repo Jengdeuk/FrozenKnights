@@ -81,7 +81,7 @@ FGameplayAbilityTargetDataHandle AFKTA_Trace::MakeTargetData() const
 		FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
 		float CapsuleHalfHeight = AttackRange * 0.5f;
 		FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
-		DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(Forward).ToQuat(), DrawColor, false, 5.0f);
+		DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(Forward).ToQuat(), DrawColor, false, 1.0f);
 	}
 
 #endif

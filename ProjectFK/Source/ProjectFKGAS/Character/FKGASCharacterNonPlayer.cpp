@@ -53,6 +53,13 @@ void AFKGASCharacterNonPlayer::OnOutOfHealth() // Server에서만 동작
 	bDead = true; // 클라로 죽은 상태 동기화
 }
 
+void AFKGASCharacterNonPlayer::SetDead()
+{
+	ASC->CancelAllAbilities();
+
+	Super::SetDead();
+}
+
 void AFKGASCharacterNonPlayer::NotifyComboActionEnd()
 {
 	OnAttackFinished.ExecuteIfBound();
@@ -65,8 +72,17 @@ void AFKGASCharacterNonPlayer::Activate()
 	if (HasAuthority())
 	{
 		bDead = false;
-		ASC->RemoveLooseGameplayTag(FKTAG_CHARACTER_ISDEAD);
 		AttributeSet->SetHealth(AttributeSet->GetMaxHealth());
+
+		FGameplayTagContainer AllTags;
+		ASC->GetOwnedGameplayTags(AllTags);
+		for (const FGameplayTag& Tag : AllTags)
+		{
+			if (ASC->HasMatchingGameplayTag(Tag))
+			{
+				ASC->RemoveLooseGameplayTag(Tag);
+			}
+		}
 	}
 }
 

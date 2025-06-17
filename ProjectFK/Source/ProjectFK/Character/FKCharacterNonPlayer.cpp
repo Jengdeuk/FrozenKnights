@@ -15,6 +15,8 @@ AFKCharacterNonPlayer::AFKCharacterNonPlayer()
 {
 	NPCClass = ENPCClass::Mob;
 
+	DeactivateDuration = 5.0f;
+
 	// Capsule
 	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_FKMOBCAPSULE);
 
@@ -69,7 +71,7 @@ void AFKCharacterNonPlayer::SetDead()
 			FKAIController->StopAI();
 		}
 
-		GetWorld()->GetTimerManager().SetTimer(DeactiveTimerHandle, this, &ThisClass::Deactivate, 5.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(DeactiveTimerHandle, this, &ThisClass::Deactivate, DeactivateDuration, false);
 
 		if (PoolManager.IsValid())
 		{

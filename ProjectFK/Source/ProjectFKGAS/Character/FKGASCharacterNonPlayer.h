@@ -25,6 +25,8 @@ public:
 	UFUNCTION()
 	virtual void OnOutOfHealth();
 
+	virtual void SetDead() override;
+
 	void NotifyComboActionEnd();
 
 public:

@@ -22,6 +22,13 @@ AFKCharacterPlayer::AFKCharacterPlayer()
 {
 	bPlayerCharacter = true;
 
+	DeactivateDuration = 5.0f;
+
+	// Respawn
+	bIsWaitingForRespawn = false;
+	RespawnStartTime = 0.0f;
+	RespawnDuration = 10.0f;
+
 	// Capsule
 	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_FKCAPSULE);
 
@@ -76,6 +83,12 @@ void AFKCharacterPlayer::Activate()
 {
 	Super::Activate();
 
+	bIsWaitingForRespawn = false;
+	if (HasAuthority())
+	{
+		RespawnTimerHandle.Invalidate();
+	}
+
 	AFKPlayerState* PS = GetPlayerState<AFKPlayerState>();
 	EPlayerClass PlayerClass = PS->GetPlayerClass();
 	if (PlayerClass == EPlayerClass::Knight)
@@ -93,6 +106,11 @@ void AFKCharacterPlayer::Activate()
 void AFKCharacterPlayer::Deactivate()
 {
 	Super::Deactivate();
+	
+	if (HasAuthority())
+	{
+		DeactiveTimerHandle.Invalidate();
+	}
 }
 
 void AFKCharacterPlayer::BeginPlay()
@@ -113,13 +131,22 @@ void AFKCharacterPlayer::SetDead()
 {
 	Super::SetDead();
 
-	if (IsLocallyControlled())
+	bIsWaitingForRespawn = true;
+	RespawnStartTime = GetWorld()->GetTimeSeconds();
+	if (HasAuthority())
 	{
-		APlayerController* PlayerController = Cast<APlayerController>(GetController());
-		if (PlayerController)
-		{
-			DisableInput(PlayerController);
-		}
+		GetWorld()->GetTimerManager().SetTimer(DeactiveTimerHandle, this, &ThisClass::Deactivate, DeactivateDuration, false);
+		GetWorld()->GetTimerManager().SetTimer(RespawnTimerHandle, this, &ThisClass::Activate, RespawnDuration, false);
+	}
+
+	AFKPlayerController* PlayerController = Cast<AFKPlayerController>(GetController());
+	if (!PlayerController)
+		return;
+
+	if (PlayerController->IsLocalController())
+	{
+		PlayerController->PauseGame();
+		PlayerController->PreparingToReturn();
 	}
 }
 

@@ -16,7 +16,13 @@ void AFKGASPlayerState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AttributeSet->SetMaxHealth(10000.0f);
+	//AttributeSet->SetAttackRadius(10.0f);
+	//AttributeSet->SetMaxHealth(10000.0f);
+	ResetHealth();
+}
+
+void AFKGASPlayerState::ResetHealth()
+{
 	AttributeSet->SetHealth(AttributeSet->GetMaxHealth());
 }
 

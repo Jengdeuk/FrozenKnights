@@ -19,6 +19,10 @@ public:
 
 public:
 	virtual void BeginPlay() override;
+	void PreparingToReturn();
+
+protected:
+	FTimerHandle RespawnTimerHandle;
 
 public:
 	void StartGame();
@@ -33,4 +37,11 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<class UFKClassSelectWidget> ClassSelectUI;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<class UFKRespawnWidget> RespawnUIClass;
+
+	UPROPERTY()
+	TObjectPtr<class UFKRespawnWidget> RespawnUI;
 };

@@ -101,7 +101,18 @@ public:
 
 protected:
 	uint8 bPlayerCharacter : 1;
+	float DeactivateDuration;
 	FTimerHandle DeactiveTimerHandle;
+
+// Respawn Section
+public:
+	float GetRespawnRemainingTime() const;
+
+protected:
+	bool bIsWaitingForRespawn;
+	float RespawnStartTime;
+	float RespawnDuration;
+	FTimerHandle RespawnTimerHandle;
 
 // Active Section
 private:

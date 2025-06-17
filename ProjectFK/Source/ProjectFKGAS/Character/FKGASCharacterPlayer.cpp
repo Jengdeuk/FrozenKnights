@@ -12,6 +12,7 @@
 #include "UI/FKGASWidgetComponent.h"
 #include "UI/FKGASUserWidget.h"
 #include "UI/FKGASHpBarUserWidget.h"
+#include "Tag/FKGameplayTag.h"
 
 AFKGASCharacterPlayer::AFKGASCharacterPlayer()
 {
@@ -101,6 +102,42 @@ void AFKGASCharacterPlayer::OnOutOfHealth() // Server에서만 동작
 {
 	SetDead();
 	bDead = true; // 클라로 죽은 상태 동기화
+}
+
+void AFKGASCharacterPlayer::SetDead()
+{
+	ASC->CancelAllAbilities();
+
+	Super::SetDead();
+}
+
+void AFKGASCharacterPlayer::Activate()
+{
+	Super::Activate();
+
+	if (HasAuthority())
+	{
+		bDead = false;
+		if (AFKGASPlayerState* PS = GetPlayerState<AFKGASPlayerState>())
+		{
+			PS->ResetHealth();
+		}
+
+		FGameplayTagContainer AllTags;
+		ASC->GetOwnedGameplayTags(AllTags);
+		for (const FGameplayTag& Tag : AllTags)
+		{
+			if (ASC->HasMatchingGameplayTag(Tag))
+			{
+				ASC->RemoveLooseGameplayTag(Tag);
+			}
+		}
+	}
+}
+
+void AFKGASCharacterPlayer::Deactivate()
+{
+	Super::Deactivate();
 }
 
 void AFKGASCharacterPlayer::OnRep_PlayerState()

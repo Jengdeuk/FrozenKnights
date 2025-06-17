@@ -33,6 +33,12 @@ protected:
 	UFUNCTION()
 	virtual void OnOutOfHealth();
 
+	virtual void SetDead() override;
+	
+public:
+	virtual void Activate() override;
+	virtual void Deactivate() override;
+
 protected:
 	virtual void OnRep_PlayerState() override;
 
