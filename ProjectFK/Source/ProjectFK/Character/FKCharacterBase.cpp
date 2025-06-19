@@ -2,6 +2,7 @@
 
 
 #include "Character/FKCharacterBase.h"
+#include "ProjectFK.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Physics/FKCollision.h"
@@ -11,10 +12,17 @@
 #include "Character/FKComboActionData.h"
 #include "Net/UnrealNetwork.h"
 #include "Components/WidgetComponent.h"
+#include "EngineUtils.h"
 
 AFKCharacterBase::AFKCharacterBase()
 {
 	bPlayerCharacter = false;
+	bDead = true;
+	bActive = false;
+	bPreparingActivate = false;
+	bReplicates = true;
+	bAlwaysRelevant = true; // 모든 클라이언트에게 항상 복제
+	NetDormancy = DORM_Never; // 절대 Dormant 상태로 가지 않음
 
 	// Pawn
 	bUseControllerRotationPitch = false;
@@ -42,13 +50,29 @@ AFKCharacterBase::AFKCharacterBase()
 	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
 	GetMesh()->SetHiddenInGame(true);
 
-	bReplicates = true;
-	bDead = false;
-	bActive = true;
-
 	OnResourcesBindCompleted.AddUObject(this, &ThisClass::OnBindResourcesCompleted);
 	OnActiveChanged.AddUObject(this, &ThisClass::ChangeActive);
 	OnDead.AddUObject(this, &ThisClass::SetDead);
+}
+
+bool AFKCharacterBase::ServerRPCDeferredActivate_Validate()
+{
+	return true;
+}
+
+void AFKCharacterBase::ServerRPCDeferredActivate_Implementation()
+{
+	DeferredActivate();
+}
+
+void AFKCharacterBase::DeferredActivate()
+{
+	if (HasAuthority())
+	{
+		bPreparingActivate = true;
+		MulticastRPCPlayStartMontage();
+		GetWorld()->GetTimerManager().SetTimer(RespawnTimerHandle, this, &ThisClass::Activate, 5.0f, false);
+	}
 }
 
 void AFKCharacterBase::Activate()
@@ -56,6 +80,8 @@ void AFKCharacterBase::Activate()
 	if (HasAuthority())
 	{
 		bActive = true;
+		bPreparingActivate = false;
+		RespawnTimerHandle.Invalidate();
 	}
 
 	SetActorHiddenInGame(false);
@@ -82,6 +108,11 @@ void AFKCharacterBase::Deactivate()
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 }
 
+void AFKCharacterBase::MulticastRPCPlayStartMontage_Implementation()
+{
+	PlayStartAnimation();
+}
+
 void AFKCharacterBase::SetCharacterControlData(const UFKCharacterControlData* CharacterControlData)
 {
 	// Pawn
@@ -95,10 +126,6 @@ void AFKCharacterBase::SetCharacterControlData(const UFKCharacterControlData* Ch
 
 void AFKCharacterBase::OnBindResourcesCompleted()
 {
-	if (IsActive())
-	{
-		Activate();
-	}
 }
 
 bool AFKCharacterBase::CheckResourcesBindCompleted()
@@ -148,6 +175,22 @@ void AFKCharacterBase::AnimLoadCompleted()
 			{
 				OnResourcesBindCompleted.Broadcast();
 			}
+		}
+	}
+
+	ResourceHandles[ResourceType]->ReleaseHandle();
+}
+
+void AFKCharacterBase::StartMontageLoadCompleted()
+{
+	EResourceType ResourceType = EResourceType::StartMontage;
+	if (ResourceHandles[ResourceType].IsValid())
+	{
+		bResourceBinds[ResourceType] = true;
+		StartMontage = Cast<UAnimMontage>(ResourceHandles[ResourceType]->GetLoadedAsset());
+		if (CheckResourcesBindCompleted())
+		{
+			OnResourcesBindCompleted.Broadcast();
 		}
 	}
 
@@ -224,6 +267,18 @@ void AFKCharacterBase::ResetCharacterAnimation()
 	if (AnimInstance)
 	{
 		AnimInstance->StopAllMontages(0.0f);
+	}
+}
+
+void AFKCharacterBase::PlayStartAnimation()
+{
+	SetActorHiddenInGame(false);
+	GetMesh()->SetHiddenInGame(false);
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->StopAllMontages(0.0f);
+		AnimInstance->Montage_Play(StartMontage, 1.0f);
 	}
 }
 

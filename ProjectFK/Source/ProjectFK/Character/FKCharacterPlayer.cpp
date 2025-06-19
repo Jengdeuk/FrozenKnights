@@ -2,6 +2,7 @@
 
 
 #include "Character/FKCharacterPlayer.h"
+#include "ProjectFK.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -12,7 +13,6 @@
 #include "Engine/AssetManager.h"
 #include "Player/FKPlayerController.h"
 #include "Player/FKPlayerState.h"
-#include "ProjectFK.h"
 #include "EngineUtils.h"
 #include "Components/WidgetComponent.h"
 #include "Physics/FKCollision.h"
@@ -89,13 +89,6 @@ void AFKCharacterPlayer::Activate()
 		RespawnTimerHandle.Invalidate();
 	}
 
-	AFKPlayerState* PS = GetPlayerState<AFKPlayerState>();
-	EPlayerClass PlayerClass = PS->GetPlayerClass();
-	if (PlayerClass == EPlayerClass::Knight)
-	{
-		EquipHelm();
-	}
-
 	if (IsLocallyControlled())
 	{
 		AFKPlayerController* PlayerController = CastChecked<AFKPlayerController>(GetController());
@@ -136,7 +129,7 @@ void AFKCharacterPlayer::SetDead()
 	if (HasAuthority())
 	{
 		GetWorld()->GetTimerManager().SetTimer(DeactiveTimerHandle, this, &ThisClass::Deactivate, DeactivateDuration, false);
-		GetWorld()->GetTimerManager().SetTimer(RespawnTimerHandle, this, &ThisClass::Activate, RespawnDuration, false);
+		GetWorld()->GetTimerManager().SetTimer(RespawnTimerHandle, this, &ThisClass::DeferredActivate, RespawnDuration, false);
 	}
 
 	AFKPlayerController* PlayerController = Cast<AFKPlayerController>(GetController());
@@ -317,6 +310,12 @@ void AFKCharacterPlayer::BindCharacterResources()
 		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AnimLoadCompleted)
 	);
 
+	bResourceBinds.FindOrAdd(EResourceType::StartMontage) = false;
+	ResourceHandles.FindOrAdd(EResourceType::StartMontage) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		StartMontages[uint8(PlayerClass)],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::StartMontageLoadCompleted)
+	);
+
 	bResourceBinds.FindOrAdd(EResourceType::AttackMontage) = false;
 	ResourceHandles.FindOrAdd(EResourceType::AttackMontage) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
 		AttackMontages[uint8(PlayerClass)],
@@ -339,6 +338,20 @@ void AFKCharacterPlayer::BindCharacterResources()
 void AFKCharacterPlayer::OnBindResourcesCompleted()
 {
 	Super::OnBindResourcesCompleted();
+
+	if (IsLocallyControlled())
+	{
+		ServerRPCDeferredActivate();
+	}
+
+	if (AFKPlayerState* PS = GetPlayerState<AFKPlayerState>())
+	{
+		EPlayerClass PlayerClass = PS->GetPlayerClass();
+		if (PlayerClass == EPlayerClass::Knight)
+		{
+			EquipHelm();
+		}
+	}
 }
 
 void AFKCharacterPlayer::EquipHelm()

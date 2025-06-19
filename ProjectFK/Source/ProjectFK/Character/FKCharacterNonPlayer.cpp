@@ -2,6 +2,7 @@
 
 
 #include "Character/FKCharacterNonPlayer.h"
+#include "ProjectFK.h"
 #include "Engine/AssetManager.h"
 #include "Net/UnrealNetwork.h"
 #include "Physics/FKCollision.h"
@@ -38,6 +39,12 @@ void AFKCharacterNonPlayer::PostInitializeComponents()
 	ResourceHandles.FindOrAdd(EResourceType::AnimInstance) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
 		AnimInstances[uint8(NPCClass)],
 		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AnimLoadCompleted)
+	);
+
+	bResourceBinds.FindOrAdd(EResourceType::StartMontage) = false;
+	ResourceHandles.FindOrAdd(EResourceType::StartMontage) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		StartMontages[uint8(NPCClass)],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::StartMontageLoadCompleted)
 	);
 
 	bResourceBinds.FindOrAdd(EResourceType::AttackMontage) = false;
@@ -88,7 +95,7 @@ void AFKCharacterNonPlayer::ActivatePoolableMonster(uint32 InMonsterId, AFKMonst
 		PoolManager = InPoolManager;
 		if (CheckResourcesBindCompleted())
 		{
-			Activate();
+			DeferredActivate();
 		}
 	}
 }

@@ -23,6 +23,7 @@ enum class EResourceType : uint8
 {
 	Mesh,
 	AnimInstance,
+	StartMontage,
 	AttackMontage,
 	DeadMontage,
 	ComboActionData,
@@ -38,14 +39,23 @@ public:
 	AFKCharacterBase();
 
 public:
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPCDeferredActivate();
+
+	void DeferredActivate();
 	virtual void Activate();
 	virtual void Deactivate();
 
+	bool IsPreparingActivate() const { return bPreparingActivate; }
 	bool IsActive() const { return bActive; }
 
 public:
 	FORCEINLINE virtual class UAnimMontage* GetAttackMontage() const { return AttackMontage; }
 	FORCEINLINE class UFKComboActionData* GetComboActionData() const { return ComboActionData; }
+
+public:
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCPlayStartMontage();
 
 protected:
 	virtual void SetCharacterControlData(const class UFKCharacterControlData* CharacterControlData);
@@ -54,6 +64,9 @@ protected:
 	TMap<ECharacterControlType, class UFKCharacterControlData*> CharacterControlManager;
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	TObjectPtr<class UAnimMontage> StartMontage;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> AttackMontage;
 
@@ -69,6 +82,7 @@ public:
 	bool CheckResourcesBindCompleted();
 	void MeshLoadCompleted();
 	void AnimLoadCompleted();
+	void StartMontageLoadCompleted();
 	void AttackMontageLoadCompleted();
 	void DeadMontageLoadCompleted();
 	void ComboActionDataLoadCompleted();
@@ -78,11 +92,11 @@ protected:
 	TMap<EResourceType, TSharedPtr<FStreamableHandle>> ResourceHandles;
 	TMap<EResourceType, bool> bResourceBinds;
 
-// Dead Section
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void SetDead();
 	void ResetCharacterAnimation();
+	void PlayStartAnimation();
 	void PlayDeadAnimation();
 
 	FDeadSignature OnDead;
@@ -124,5 +138,6 @@ private:
 	void OnRep_ActiveChanged();
 
 	UPROPERTY(ReplicatedUsing = "OnRep_ActiveChanged")
-	uint8 bActive : 1;
+	bool bActive;
+	bool bPreparingActivate;
 };

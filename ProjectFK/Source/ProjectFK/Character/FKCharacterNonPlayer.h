@@ -44,6 +44,9 @@ protected:
 	TArray<FSoftObjectPath> AnimInstances;
 
 	UPROPERTY(config)
+	TArray<FSoftObjectPath> StartMontages;
+
+	UPROPERTY(config)
 	TArray<FSoftObjectPath> AttackMontages;
 
 	UPROPERTY(config)

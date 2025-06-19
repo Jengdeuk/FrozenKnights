@@ -15,6 +15,9 @@ struct FSpawnSlot
 	FVector SpawnLocation;
 
 	UPROPERTY()
+	FRotator SpawnRotation;
+
+	UPROPERTY()
 	FTimerHandle SpawnTimerHandle;
 };
 
