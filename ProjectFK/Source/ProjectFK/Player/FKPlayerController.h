@@ -25,8 +25,8 @@ protected:
 	FTimerHandle RespawnTimerHandle;
 
 public:
-	void StartGame();
-	void PauseGame();
+	virtual void StartGame();
+	virtual void PauseGame();
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerRPCSelectClass(const EPlayerClass& PlayerClass);

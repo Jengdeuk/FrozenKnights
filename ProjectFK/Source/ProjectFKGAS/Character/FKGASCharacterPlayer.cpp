@@ -13,6 +13,7 @@
 #include "UI/FKGASUserWidget.h"
 #include "UI/FKGASHpBarUserWidget.h"
 #include "Tag/FKGameplayTag.h"
+#include "player/FKGASPlayerController.h"
 
 AFKGASCharacterPlayer::AFKGASCharacterPlayer()
 {
@@ -187,6 +188,11 @@ void AFKGASCharacterPlayer::SetGAS()
 		{
 			APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
 			PlayerController->ConsoleCommand(TEXT("showdebug abilitysystem"));
+
+			if (AFKGASPlayerController* GASPC = Cast<AFKGASPlayerController>(PlayerController))
+			{
+				GASPC->SetGAS();
+			}
 		}
 	}
 }
