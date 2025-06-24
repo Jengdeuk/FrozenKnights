@@ -109,4 +109,15 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Helm")
 	TObjectPtr<class UStaticMesh> HelmMesh;
+
+// Collider Section
+private:
+	UFUNCTION()
+	void OnCharacterOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnCharacterOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class USphereComponent> CharacterOverlapDetector;
 };

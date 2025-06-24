@@ -49,6 +49,8 @@ public:
 	bool IsPreparingActivate() const { return bPreparingActivate; }
 	bool IsActive() const { return bActive; }
 
+	void SetHpBarHiddenInGame(bool bHiddenValue);
+
 public:
 	FORCEINLINE virtual class UAnimMontage* GetAttackMontage() const { return AttackMontage; }
 	FORCEINLINE class UFKComboActionData* GetComboActionData() const { return ComboActionData; }
@@ -91,7 +93,7 @@ protected:
 	FResourcesBindCompletedSignature OnResourcesBindCompleted;
 	TMap<EResourceType, TSharedPtr<FStreamableHandle>> ResourceHandles;
 	TMap<EResourceType, bool> bResourceBinds;
-
+	
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void SetDead();
@@ -109,6 +111,8 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UWidgetComponent> HpBar;
+
+	FTimerHandle HpBarToggleTimerHandle;
 
 public:
 	FORCEINLINE bool IsPlayerCharacter() const { return bPlayerCharacter; }

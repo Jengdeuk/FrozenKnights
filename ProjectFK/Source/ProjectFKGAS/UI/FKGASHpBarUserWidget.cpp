@@ -7,6 +7,7 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Tag/FKGameplayTag.h"
+#include "Character/FKCharacterBase.h"
 
 void UFKGASHpBarUserWidget::SetAbilitySystemComponent(AActor* InOwner)
 {
@@ -17,7 +18,7 @@ void UFKGASHpBarUserWidget::SetAbilitySystemComponent(AActor* InOwner)
 		ASC->GetGameplayAttributeValueChangeDelegate(UFKCharacterAttributeSet::GetHealthAttribute()).AddUObject(this, &UFKGASHpBarUserWidget::OnHealthChanged);
 		ASC->GetGameplayAttributeValueChangeDelegate(UFKCharacterAttributeSet::GetMaxHealthAttribute()).AddUObject(this, &UFKGASHpBarUserWidget::OnMaxHealthChanged);
 		ASC->RegisterGameplayTagEvent(FKTAG_CHARACTER_ISINVINSIBLE, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &UFKGASHpBarUserWidget::OnInvinsibleTagChanged);
-		PbHpBar->SetFillColorAndOpacity(HealthColor);
+		PbHpBar->SetFillColorAndOpacity(Cast<AFKCharacterBase>(InOwner)->IsPlayerCharacter() ? PlayerHealthColor : HealthColor);
 
 		const UFKCharacterAttributeSet* CurrentAttributeSet = ASC->GetSet<UFKCharacterAttributeSet>();
 		if (CurrentAttributeSet)

@@ -22,7 +22,7 @@ AFKCharacterBase::AFKCharacterBase()
 	bPreparingActivate = false;
 	bReplicates = true;
 	bAlwaysRelevant = true; // 모든 클라이언트에게 항상 복제
-	NetDormancy = DORM_Never; // 절대 Dormant 상태로 가지 않음
+	//NetDormancy = DORM_Never; // 절대 Dormant 상태로 가지 않음
 
 	// Pawn
 	bUseControllerRotationPitch = false;
@@ -85,7 +85,6 @@ void AFKCharacterBase::Activate()
 	}
 
 	SetActorHiddenInGame(false);
-	HpBar->SetHiddenInGame(false);
 	GetMesh()->SetHiddenInGame(false);
 	SetActorEnableCollision(true);
 	SetActorTickEnabled(true);
@@ -106,6 +105,11 @@ void AFKCharacterBase::Deactivate()
 	SetActorEnableCollision(false);
 	SetActorTickEnabled(false);
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+}
+
+void AFKCharacterBase::SetHpBarHiddenInGame(bool bHiddenValue)
+{
+	HpBar->SetHiddenInGame(bHiddenValue);
 }
 
 void AFKCharacterBase::MulticastRPCPlayStartMontage_Implementation()

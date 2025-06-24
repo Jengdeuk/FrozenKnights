@@ -17,6 +17,7 @@
 #include "Components/WidgetComponent.h"
 #include "Physics/FKCollision.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 
 AFKCharacterPlayer::AFKCharacterPlayer()
 {
@@ -77,6 +78,17 @@ AFKCharacterPlayer::AFKCharacterPlayer()
 	{
 		HelmMesh = HelmMeshRef.Object;
 	}
+
+	// Collider Component
+	CharacterOverlapDetector = CreateDefaultSubobject<USphereComponent>(TEXT("CharacterOverlapDetector"));
+	CharacterOverlapDetector->SetupAttachment(RootComponent);
+	CharacterOverlapDetector->SetSphereRadius(1100.0f); // HPBar 표시 범위
+	CharacterOverlapDetector->SetCollisionProfileName(CPROFILE_FKCHARACTEROVERLAPDETECTOR);
+	CharacterOverlapDetector->SetGenerateOverlapEvents(true);
+	CharacterOverlapDetector->SetShouldUpdatePhysicsVolume(false);
+
+	CharacterOverlapDetector->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnCharacterOverlapBegin);
+	CharacterOverlapDetector->OnComponentEndOverlap.AddDynamic(this, &ThisClass::OnCharacterOverlapEnd);
 }
 
 void AFKCharacterPlayer::Activate()
@@ -365,4 +377,32 @@ void AFKCharacterPlayer::OnRep_PlayerState()
 	Super::OnRep_PlayerState();
 
 	BindCharacterResources();
+}
+
+void AFKCharacterPlayer::OnCharacterOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (IsLocallyControlled() == false)
+	{
+		return;
+	}
+
+	AFKCharacterBase* OtherChar = Cast<AFKCharacterBase>(OtherActor);
+	if (OtherChar && OtherChar != this && OtherChar->IsActive())
+	{
+		OtherChar->SetHpBarHiddenInGame(false);
+	}
+}
+
+void AFKCharacterPlayer::OnCharacterOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (IsLocallyControlled() == false)
+	{
+		return;
+	}
+
+	AFKCharacterBase* OtherChar = Cast<AFKCharacterBase>(OtherActor);
+	if (OtherChar && OtherChar != this)
+	{
+		OtherChar->SetHpBarHiddenInGame(true);
+	}
 }
