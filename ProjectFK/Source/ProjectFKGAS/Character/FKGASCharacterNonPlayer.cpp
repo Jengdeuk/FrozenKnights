@@ -73,6 +73,7 @@ void AFKGASCharacterNonPlayer::Activate()
 	{
 		bDead = false;
 		AttributeSet->SetHealth(AttributeSet->GetMaxHealth());
+		// 타입에 따라서 체력, 공격력, 스피드 초기화
 
 		FGameplayTagContainer AllTags;
 		ASC->GetOwnedGameplayTags(AllTags);

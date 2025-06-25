@@ -6,10 +6,15 @@
 #include "GameFramework/Actor.h"
 #include "FKMonsterPoolManager.generated.h"
 
+enum class ENPCType : uint8;
+
 USTRUCT()
 struct FSpawnSlot
 {
 	GENERATED_BODY()
+
+	UPROPERTY()
+	ENPCType MobType;
 
 	UPROPERTY()
 	FVector SpawnLocation;

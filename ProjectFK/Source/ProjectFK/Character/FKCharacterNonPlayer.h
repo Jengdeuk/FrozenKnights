@@ -8,10 +8,36 @@
 #include "FKCharacterNonPlayer.generated.h"
 
 UENUM()
-enum class ENPCClass : uint8
+enum class ENPCType : uint8
 {
-	Mob,
+	Warchief,
+	Qilin,
+	BeetleRed,
 	Boss
+};
+
+USTRUCT()
+struct FResourceSet
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	uint8 MeshIndex;
+
+	UPROPERTY()
+	uint8 AnimInstanceIndex;
+
+	UPROPERTY()
+	uint8 StartMontageIndex;
+
+	UPROPERTY()
+	uint8 AttackMontageIndex;
+
+	UPROPERTY()
+	uint8 DeadMontageIndex;
+
+	UPROPERTY()
+	uint8 ComboActionDataIndex;
 };
 
 UCLASS(config = ProjectFK)
@@ -23,17 +49,25 @@ public:
 	AFKCharacterNonPlayer();
 
 protected:
-	virtual void PostInitializeComponents() override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void SetDead() override;
 
 public:
 	void ActivatePoolableMonster(uint32 InMonsterId, class AFKMonsterPoolManager* InPoolManager);
+	void SetType(ENPCType NewType);
 	void SetHomePos(FVector InPosition);
+
 	virtual void Activate() override;
 	virtual void Deactivate() override;
 
+	bool IsPreparingActivate() const { return bPreparingActivate; }
+
+private:
+	bool bPreparingActivate;
+
 protected:
-	ENPCClass NPCClass;
+	UPROPERTY(Replicated)
+	ENPCType NPCType;
 
 // Resource Section
 protected:
@@ -55,7 +89,13 @@ protected:
 	UPROPERTY(config)
 	TArray<FSoftObjectPath> ComboActionDatas;
 
+	UPROPERTY()
+	TMap<ENPCType, FResourceSet> ResourceSets;
+
 public:
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCBindCharacterResources(ENPCType MobType);
+	void BindCharacterResources(ENPCType MobType);
 	virtual void OnBindResourcesCompleted() override;
 
 // AI Section

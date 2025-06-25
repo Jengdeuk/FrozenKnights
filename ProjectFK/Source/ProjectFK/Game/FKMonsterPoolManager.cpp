@@ -3,19 +3,19 @@
 
 AFKMonsterPoolManager::AFKMonsterPoolManager()
 {
-	SpawnSlots.Add({ FVector(-1190, 2050, -404), FRotator(0, 90, 0), FTimerHandle()});
-	SpawnSlots.Add({ FVector(-1920, 1700, -404), FRotator(0, 90, 0), FTimerHandle() });
-	SpawnSlots.Add({ FVector(-420, 1710, -404), FRotator(0, 90, 0), FTimerHandle() });
+	SpawnSlots.Add({ ENPCType::Warchief, FVector(-1190, 2050, -404), FRotator(0, 90, 0), FTimerHandle()});
+	SpawnSlots.Add({ ENPCType::Qilin, FVector(-1920, 1700, -404), FRotator(0, 90, 0), FTimerHandle() });
+	SpawnSlots.Add({ ENPCType::BeetleRed, FVector(-420, 1710, -404), FRotator(0, 90, 0), FTimerHandle() });
 
-	SpawnSlots.Add({ FVector(-1200, 1020, -305), FRotator(0, 90, 0), FTimerHandle() });
-	SpawnSlots.Add({ FVector(-2140, 10, -116), FRotator(0, 180, 0), FTimerHandle() });
-	SpawnSlots.Add({ FVector(-530, 20, -74), FRotator(0, 0, 0), FTimerHandle() });
+	SpawnSlots.Add({ ENPCType::Warchief, FVector(-1200, 1020, -305), FRotator(0, 90, 0), FTimerHandle() });
+	SpawnSlots.Add({ ENPCType::Qilin, FVector(-2140, 10, -116), FRotator(0, 180, 0), FTimerHandle() });
+	SpawnSlots.Add({ ENPCType::BeetleRed,FVector(-530, 20, -74), FRotator(0, 0, 0), FTimerHandle() });
 
-	SpawnSlots.Add({ FVector(830, 3140, -427), FRotator(0, 180, 0), FTimerHandle() });
-	SpawnSlots.Add({ FVector(820, 4830, -437), FRotator(0, 180, 0), FTimerHandle() });
+	SpawnSlots.Add({ ENPCType::Qilin, FVector(830, 3140, -427), FRotator(0, 180, 0), FTimerHandle() });
+	SpawnSlots.Add({ ENPCType::BeetleRed, FVector(820, 4830, -437), FRotator(0, 180, 0), FTimerHandle() });
 
-	SpawnSlots.Add({ FVector(2100, 4320, -647), FRotator(0, 180, 0), FTimerHandle() });
-	SpawnSlots.Add({ FVector(2560, 4040, -647), FRotator(0, 0, 0), FTimerHandle() });
+	SpawnSlots.Add({ ENPCType::Warchief, FVector(2100, 4320, -647), FRotator(0, 180, 0), FTimerHandle() });
+	SpawnSlots.Add({ ENPCType::Qilin, FVector(2560, 4040, -647), FRotator(0, 0, 0), FTimerHandle() });
 }
 
 void AFKMonsterPoolManager::InitPool(UClass* InMonsterClass, int32 Size)
@@ -50,10 +50,11 @@ void AFKMonsterPoolManager::Spawn(uint32 MonsterId)
 	{
 		if (Monster->IsActive() == false && Monster->IsPreparingActivate() == false)
 		{
-			Monster->ActivatePoolableMonster(MonsterId, this);
+			Monster->SetType(SpawnSlots[MonsterId].MobType);
 			Monster->SetActorLocation(SpawnSlots[MonsterId].SpawnLocation);
 			Monster->SetActorRotation(SpawnSlots[MonsterId].SpawnRotation);
 			Monster->SetHomePos(SpawnSlots[MonsterId].SpawnLocation);
+			Monster->ActivatePoolableMonster(MonsterId, this);
 			return;
 		}
 	}
@@ -63,10 +64,11 @@ void AFKMonsterPoolManager::Spawn(uint32 MonsterId)
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	if (AFKCharacterNonPlayer* NewMonster = GetWorld()->SpawnActor<AFKCharacterNonPlayer>(MonsterClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams))
 	{
-		NewMonster->ActivatePoolableMonster(MonsterId, this);
+		NewMonster->SetType(SpawnSlots[MonsterId].MobType);
 		NewMonster->SetActorLocation(SpawnSlots[MonsterId].SpawnLocation);
 		NewMonster->SetActorRotation(SpawnSlots[MonsterId].SpawnRotation);
 		NewMonster->SetHomePos(SpawnSlots[MonsterId].SpawnLocation);
+		NewMonster->ActivatePoolableMonster(MonsterId, this);
 		MonsterPool.Add(NewMonster);
 	}
 }

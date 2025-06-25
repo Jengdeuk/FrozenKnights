@@ -19,7 +19,6 @@ AFKCharacterBase::AFKCharacterBase()
 	bPlayerCharacter = false;
 	bDead = true;
 	bActive = false;
-	bPreparingActivate = false;
 	bReplicates = true;
 	bAlwaysRelevant = true; // 모든 클라이언트에게 항상 복제
 	//NetDormancy = DORM_Never; // 절대 Dormant 상태로 가지 않음
@@ -69,7 +68,6 @@ void AFKCharacterBase::DeferredActivate()
 {
 	if (HasAuthority())
 	{
-		bPreparingActivate = true;
 		MulticastRPCPlayStartMontage();
 		GetWorld()->GetTimerManager().SetTimer(RespawnTimerHandle, this, &ThisClass::Activate, 5.0f, false);
 	}
@@ -80,7 +78,6 @@ void AFKCharacterBase::Activate()
 	if (HasAuthority())
 	{
 		bActive = true;
-		bPreparingActivate = false;
 		RespawnTimerHandle.Invalidate();
 	}
 

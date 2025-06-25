@@ -14,7 +14,8 @@
 
 AFKCharacterNonPlayer::AFKCharacterNonPlayer()
 {
-	NPCClass = ENPCClass::Mob;
+	NPCType = ENPCType::Warchief;
+	bPreparingActivate = false;
 
 	DeactivateDuration = 5.0f;
 
@@ -23,47 +24,17 @@ AFKCharacterNonPlayer::AFKCharacterNonPlayer()
 
 	// Movement
 	GetCharacterMovement()->MaxWalkSpeed = 400.f;
+
+	ResourceSets.Add(ENPCType::Warchief, { 0, 0, 0, 0, 0, 0 });
+	ResourceSets.Add(ENPCType::Qilin, { 1, 0, 0, 0, 0, 0 });
+	ResourceSets.Add(ENPCType::BeetleRed, { 2, 0, 0, 0, 0, 0 });
 }
 
-void AFKCharacterNonPlayer::PostInitializeComponents()
+void AFKCharacterNonPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	Super::PostInitializeComponents();
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	bResourceBinds.FindOrAdd(EResourceType::Mesh) = false;
-	ResourceHandles.FindOrAdd(EResourceType::Mesh) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
-		Meshes[uint8(NPCClass)],
-		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::MeshLoadCompleted)
-	);
-
-	bResourceBinds.FindOrAdd(EResourceType::AnimInstance) = false;
-	ResourceHandles.FindOrAdd(EResourceType::AnimInstance) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
-		AnimInstances[uint8(NPCClass)],
-		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AnimLoadCompleted)
-	);
-
-	bResourceBinds.FindOrAdd(EResourceType::StartMontage) = false;
-	ResourceHandles.FindOrAdd(EResourceType::StartMontage) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
-		StartMontages[uint8(NPCClass)],
-		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::StartMontageLoadCompleted)
-	);
-
-	bResourceBinds.FindOrAdd(EResourceType::AttackMontage) = false;
-	ResourceHandles.FindOrAdd(EResourceType::AttackMontage) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
-		AttackMontages[uint8(NPCClass)],
-		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AttackMontageLoadCompleted)
-	);
-
-	bResourceBinds.FindOrAdd(EResourceType::DeadMontage) = false;
-	ResourceHandles.FindOrAdd(EResourceType::DeadMontage) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
-		DeadMontages[uint8(NPCClass)],
-		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::DeadMontageLoadCompleted)
-	);
-
-	bResourceBinds.FindOrAdd(EResourceType::ComboActionData) = false;
-	ResourceHandles.FindOrAdd(EResourceType::ComboActionData) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
-		ComboActionDatas[uint8(NPCClass)],
-		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::ComboActionDataLoadCompleted)
-	);
+	DOREPLIFETIME(AFKCharacterNonPlayer, NPCType);
 }
 
 void AFKCharacterNonPlayer::SetDead()
@@ -91,13 +62,16 @@ void AFKCharacterNonPlayer::ActivatePoolableMonster(uint32 InMonsterId, AFKMonst
 {
 	if (HasAuthority() && InPoolManager)
 	{
+		bPreparingActivate = true;
 		MonsterId = InMonsterId;
 		PoolManager = InPoolManager;
-		if (CheckResourcesBindCompleted())
-		{
-			DeferredActivate();
-		}
+		MulticastRPCBindCharacterResources(NPCType);
 	}
+}
+
+void AFKCharacterNonPlayer::SetType(ENPCType NewType)
+{
+	NPCType = NewType;
 }
 
 void AFKCharacterNonPlayer::SetHomePos(FVector InPosition)
@@ -115,6 +89,8 @@ void AFKCharacterNonPlayer::Activate()
 
 	if (HasAuthority())
 	{
+		bPreparingActivate = false;
+
 		AFKAIController* FKAIController = Cast<AFKAIController>(GetController());
 		if (FKAIController)
 		{
@@ -139,9 +115,58 @@ void AFKCharacterNonPlayer::Deactivate()
 	}
 }
 
+void AFKCharacterNonPlayer::MulticastRPCBindCharacterResources_Implementation(ENPCType MobType)
+{
+	BindCharacterResources(MobType);
+}
+
+void AFKCharacterNonPlayer::BindCharacterResources(ENPCType MobType)
+{
+	bResourceBinds.FindOrAdd(EResourceType::Mesh) = false;
+	ResourceHandles.FindOrAdd(EResourceType::Mesh) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		Meshes[ResourceSets[MobType].MeshIndex],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::MeshLoadCompleted)
+	);
+
+	bResourceBinds.FindOrAdd(EResourceType::AnimInstance) = false;
+	ResourceHandles.FindOrAdd(EResourceType::AnimInstance) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		AnimInstances[ResourceSets[MobType].AnimInstanceIndex],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AnimLoadCompleted)
+	);
+
+	bResourceBinds.FindOrAdd(EResourceType::StartMontage) = false;
+	ResourceHandles.FindOrAdd(EResourceType::StartMontage) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		StartMontages[ResourceSets[MobType].StartMontageIndex],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::StartMontageLoadCompleted)
+	);
+
+	bResourceBinds.FindOrAdd(EResourceType::AttackMontage) = false;
+	ResourceHandles.FindOrAdd(EResourceType::AttackMontage) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		AttackMontages[ResourceSets[MobType].AttackMontageIndex],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AttackMontageLoadCompleted)
+	);
+
+	bResourceBinds.FindOrAdd(EResourceType::DeadMontage) = false;
+	ResourceHandles.FindOrAdd(EResourceType::DeadMontage) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		DeadMontages[ResourceSets[MobType].DeadMontageIndex],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::DeadMontageLoadCompleted)
+	);
+
+	bResourceBinds.FindOrAdd(EResourceType::ComboActionData) = false;
+	ResourceHandles.FindOrAdd(EResourceType::ComboActionData) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
+		ComboActionDatas[ResourceSets[MobType].ComboActionDataIndex],
+		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::ComboActionDataLoadCompleted)
+	);
+}
+
 void AFKCharacterNonPlayer::OnBindResourcesCompleted()
 {
 	Super::OnBindResourcesCompleted();
+
+	if (HasAuthority())
+	{
+		DeferredActivate();
+	}
 }
 
 float AFKCharacterNonPlayer::GetAIPatrolRadius()

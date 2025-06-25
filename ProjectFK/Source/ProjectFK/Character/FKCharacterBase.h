@@ -46,7 +46,6 @@ public:
 	virtual void Activate();
 	virtual void Deactivate();
 
-	bool IsPreparingActivate() const { return bPreparingActivate; }
 	bool IsActive() const { return bActive; }
 
 	void SetHpBarHiddenInGame(bool bHiddenValue);
@@ -143,5 +142,4 @@ private:
 
 	UPROPERTY(ReplicatedUsing = "OnRep_ActiveChanged")
 	bool bActive;
-	bool bPreparingActivate;
 };
