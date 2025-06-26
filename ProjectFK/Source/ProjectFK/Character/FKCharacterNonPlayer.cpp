@@ -22,9 +22,6 @@ AFKCharacterNonPlayer::AFKCharacterNonPlayer()
 	// Capsule
 	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_FKMOBCAPSULE);
 
-	// Movement
-	GetCharacterMovement()->MaxWalkSpeed = 400.f;
-
 	ResourceSets.Add(ENPCType::Warchief, { 0, 0, 0, 0, 0, 0 });
 	ResourceSets.Add(ENPCType::Qilin, { 1, 0, 0, 0, 0, 0 });
 	ResourceSets.Add(ENPCType::BeetleRed, { 2, 0, 0, 0, 0, 0 });

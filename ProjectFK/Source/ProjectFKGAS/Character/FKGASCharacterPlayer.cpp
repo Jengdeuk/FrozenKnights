@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "AbilitySystemComponent.h"
 #include "Player/FKGASPlayerState.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "ProjectFKGAS.h"
 #include "Attribute/FKCharacterAttributeSet.h"
 #include "Net/UnrealNetwork.h"
@@ -99,6 +100,11 @@ void AFKGASCharacterPlayer::GASInputReleased(int32 InputId)
 	}
 }
 
+void AFKGASCharacterPlayer::OnSpeedChanged(const FOnAttributeChangeData& ChangeData)
+{
+	GetCharacterMovement()->MaxWalkSpeed = ChangeData.NewValue;
+}
+
 void AFKGASCharacterPlayer::OnOutOfHealth() // Server에서만 동작
 {
 	SetDead();
@@ -154,6 +160,7 @@ void AFKGASCharacterPlayer::SetGAS()
 	{
 		ASC = GASPS->GetAbilitySystemComponent();
 		ASC->InitAbilityActorInfo(GASPS, this);
+		ASC->GetGameplayAttributeValueChangeDelegate(UFKCharacterAttributeSet::GetSpeedAttribute()).AddUObject(this, &ThisClass::OnSpeedChanged);
 
 		const UFKCharacterAttributeSet* CurrentAttributeSet = ASC->GetSet<UFKCharacterAttributeSet>();
 		if (CurrentAttributeSet)

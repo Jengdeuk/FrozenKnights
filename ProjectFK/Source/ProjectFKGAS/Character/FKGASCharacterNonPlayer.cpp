@@ -4,6 +4,7 @@
 #include "Character/FKGASCharacterNonPlayer.h"
 #include "AbilitySystemComponent.h"
 #include "Attribute/FKCharacterAttributeSet.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "AI/FKGASAIController.h"
 #include "UI/FKGASWidgetComponent.h"
 #include "UI/FKGASUserWidget.h"
@@ -72,8 +73,28 @@ void AFKGASCharacterNonPlayer::Activate()
 	if (HasAuthority())
 	{
 		bDead = false;
-		AttributeSet->SetHealth(AttributeSet->GetMaxHealth());
+
 		// 타입에 따라서 체력, 공격력, 스피드 초기화
+		switch (NPCType)
+		{
+		case ENPCType::Warchief:
+			AttributeSet->SetMaxHealth(100.0f);
+			AttributeSet->SetAttackRate(30.0f);
+			AttributeSet->SetSpeed(600.0f);
+			break;
+		case ENPCType::Qilin:
+			AttributeSet->SetMaxHealth(300.0f);
+			AttributeSet->SetAttackRate(100.0f);
+			AttributeSet->SetSpeed(400.0f);
+			break;
+		case ENPCType::BeetleRed:
+			AttributeSet->SetMaxHealth(1000.0f);
+			AttributeSet->SetAttackRate(200.0f);
+			AttributeSet->SetSpeed(300.0f);
+			break;
+		}
+
+		AttributeSet->SetHealth(AttributeSet->GetMaxHealth());
 
 		FGameplayTagContainer AllTags;
 		ASC->GetOwnedGameplayTags(AllTags);
@@ -138,6 +159,11 @@ void AFKGASCharacterNonPlayer::AttackByAI()
 	}
 }
 
+void AFKGASCharacterNonPlayer::OnSpeedChanged(const FOnAttributeChangeData& ChangeData)
+{
+	GetCharacterMovement()->MaxWalkSpeed = ChangeData.NewValue;
+}
+
 void AFKGASCharacterNonPlayer::SetGAS()
 {
 	ASC->InitAbilityActorInfo(this, this);
@@ -147,5 +173,6 @@ void AFKGASCharacterNonPlayer::SetGAS()
 		ASC->GiveAbility(StartSpec);
 	}
 
+	ASC->GetGameplayAttributeValueChangeDelegate(UFKCharacterAttributeSet::GetSpeedAttribute()).AddUObject(this, &ThisClass::OnSpeedChanged);
 	AttributeSet->OnOutOfHealth.AddDynamic(this, &ThisClass::OnOutOfHealth);
 }

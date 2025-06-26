@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/FKCharacterPlayer.h"
 #include "AbilitySystemInterface.h"
+#include "GameplayEffectTypes.h"
 #include "Abilities/GameplayAbilityTypes.h"
 #include "FKGASCharacterPlayer.generated.h"
 
@@ -29,6 +30,8 @@ protected:
 	void SetupGASInputComponent();
 	void GASInputPressed(int32 InputId);
 	void GASInputReleased(int32 InputId);
+
+	void OnSpeedChanged(const FOnAttributeChangeData& ChangeData);
 
 	UFUNCTION()
 	virtual void OnOutOfHealth();

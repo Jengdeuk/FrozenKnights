@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/FKCharacterNonPlayer.h"
 #include "AbilitySystemInterface.h"
+#include "GameplayEffectTypes.h"
 #include "FKGASCharacterNonPlayer.generated.h"
 
 /**
@@ -44,6 +45,9 @@ protected:
 	virtual void AttackByAI() override;
 
 	FAICharacterAttackFinished OnAttackFinished;
+
+private:
+	void OnSpeedChanged(const FOnAttributeChangeData& ChangeData);
 
 protected:
 	UPROPERTY(EditAnywhere, Category = GAS)

@@ -8,12 +8,11 @@
 
 UFKCharacterAttributeSet::UFKCharacterAttributeSet() :
 	AttackRange(100.0f),
-	MaxAttackRange(300.0f),
 	AttackRadius(150.0f),
-	MaxAttackRadius(300.0f),
 	AttackRate(30.0f),
-	MaxAttackRate(100.0f),
+	Speed(500.0f),
 	MaxHealth(100.0f),
+	MaxStamina(100.0f),
 	Damage(0.0f)
 {
 	InitHealth(GetMaxHealth());
@@ -79,51 +78,11 @@ void UFKCharacterAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UFKCharacterAttributeSet, AttackRange);
-	DOREPLIFETIME(UFKCharacterAttributeSet, MaxAttackRange);
 	DOREPLIFETIME(UFKCharacterAttributeSet, AttackRadius);
-	DOREPLIFETIME(UFKCharacterAttributeSet, MaxAttackRadius);
 	DOREPLIFETIME(UFKCharacterAttributeSet, AttackRate);
-	DOREPLIFETIME(UFKCharacterAttributeSet, MaxAttackRate);
+	DOREPLIFETIME(UFKCharacterAttributeSet, Speed);
 	DOREPLIFETIME(UFKCharacterAttributeSet, Health);
 	DOREPLIFETIME(UFKCharacterAttributeSet, MaxHealth);
-}
-
-void UFKCharacterAttributeSet::OnRep_AttackRange(const FGameplayAttributeData& OldAttackRange) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UFKCharacterAttributeSet, AttackRange, OldAttackRange);
-}
-
-void UFKCharacterAttributeSet::OnRep_MaxAttackRange(const FGameplayAttributeData& OldMaxAttackRange) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UFKCharacterAttributeSet, MaxAttackRange, OldMaxAttackRange);
-}
-
-void UFKCharacterAttributeSet::OnRep_AttackRadius(const FGameplayAttributeData& OldAttackRadius) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UFKCharacterAttributeSet, AttackRadius, OldAttackRadius);
-}
-
-void UFKCharacterAttributeSet::OnRep_MaxAttackRadius(const FGameplayAttributeData& OldMaxAttackRadius) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UFKCharacterAttributeSet, MaxAttackRadius, OldMaxAttackRadius);
-}
-
-void UFKCharacterAttributeSet::OnRep_AttackRate(const FGameplayAttributeData& OldAttackRate) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UFKCharacterAttributeSet, AttackRate, OldAttackRate);
-}
-
-void UFKCharacterAttributeSet::OnRep_MaxAttackRate(const FGameplayAttributeData& OldMaxAttackRate) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UFKCharacterAttributeSet, MaxAttackRate, OldMaxAttackRate);
-}
-
-void UFKCharacterAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UFKCharacterAttributeSet, Health, OldHealth);
-}
-
-void UFKCharacterAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UFKCharacterAttributeSet, MaxHealth, OldMaxHealth);
+	DOREPLIFETIME(UFKCharacterAttributeSet, Stamina);
+	DOREPLIFETIME(UFKCharacterAttributeSet, MaxStamina);
 }
