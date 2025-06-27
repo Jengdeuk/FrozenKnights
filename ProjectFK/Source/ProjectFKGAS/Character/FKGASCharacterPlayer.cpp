@@ -105,6 +105,11 @@ void AFKGASCharacterPlayer::OnSpeedChanged(const FOnAttributeChangeData& ChangeD
 	GetCharacterMovement()->MaxWalkSpeed = ChangeData.NewValue;
 }
 
+void AFKGASCharacterPlayer::OnRepSpeedChanged(float ChangeValue)
+{
+	GetCharacterMovement()->MaxWalkSpeed = ChangeValue;
+}
+
 void AFKGASCharacterPlayer::OnOutOfHealth() // Server에서만 동작
 {
 	SetDead();
@@ -166,6 +171,7 @@ void AFKGASCharacterPlayer::SetGAS()
 		if (CurrentAttributeSet)
 		{
 			CurrentAttributeSet->OnOutOfHealth.AddDynamic(this, &ThisClass::OnOutOfHealth);
+			CurrentAttributeSet->OnRepSpeedChanged.AddDynamic(this, &ThisClass::OnRepSpeedChanged);
 		}
 
 		for (const auto& StartAbility : StartAbilities)

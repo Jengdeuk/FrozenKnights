@@ -16,6 +16,7 @@ UFKCharacterAttributeSet::UFKCharacterAttributeSet() :
 	Damage(0.0f)
 {
 	InitHealth(GetMaxHealth());
+	bOutOfHealth = false;
 }
 
 void UFKCharacterAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
@@ -73,6 +74,12 @@ void UFKCharacterAttributeSet::PostGameplayEffectExecute(const FGameplayEffectMo
 	bOutOfHealth = (GetHealth() <= 0.0f);
 }
 
+void UFKCharacterAttributeSet::SetRespawn()
+{
+	bOutOfHealth = false;
+	SetHealth(GetMaxHealth());
+}
+
 void UFKCharacterAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -85,4 +92,30 @@ void UFKCharacterAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	DOREPLIFETIME(UFKCharacterAttributeSet, MaxHealth);
 	DOREPLIFETIME(UFKCharacterAttributeSet, Stamina);
 	DOREPLIFETIME(UFKCharacterAttributeSet, MaxStamina);
+	DOREPLIFETIME(UFKCharacterAttributeSet, bOutOfHealth);
+}
+
+void UFKCharacterAttributeSet::OnRep_SpeedChanged()
+{
+	OnRepSpeedChanged.Broadcast(GetSpeed());
+}
+
+void UFKCharacterAttributeSet::OnRep_HealthChanged()
+{
+	OnRepHealthChanged.Broadcast(GetHealth());
+}
+
+void UFKCharacterAttributeSet::OnRep_MaxHealthChanged()
+{
+	OnRepMaxHealthChanged.Broadcast(GetMaxHealth());
+}
+
+void UFKCharacterAttributeSet::OnRep_StaminaChanged()
+{
+	OnRepStaminaChanged.Broadcast(GetStamina());
+}
+
+void UFKCharacterAttributeSet::OnRep_MaxStaminaChanged()
+{
+	OnRepMaxStaminaChanged.Broadcast(GetMaxStamina());
 }

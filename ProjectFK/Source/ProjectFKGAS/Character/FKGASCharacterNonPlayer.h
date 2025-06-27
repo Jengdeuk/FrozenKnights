@@ -49,6 +49,9 @@ protected:
 private:
 	void OnSpeedChanged(const FOnAttributeChangeData& ChangeData);
 
+	UFUNCTION()
+	void OnRepSpeedChanged(float ChangeValue);
+
 protected:
 	UPROPERTY(EditAnywhere, Category = GAS)
 	TObjectPtr<class UAbilitySystemComponent> ASC;

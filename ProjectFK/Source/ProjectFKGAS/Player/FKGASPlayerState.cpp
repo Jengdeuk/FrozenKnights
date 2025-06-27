@@ -23,7 +23,7 @@ void AFKGASPlayerState::BeginPlay()
 
 void AFKGASPlayerState::ResetHealth()
 {
-	AttributeSet->SetHealth(AttributeSet->GetMaxHealth());
+	AttributeSet->SetRespawn();
 }
 
 UAbilitySystemComponent* AFKGASPlayerState::GetAbilitySystemComponent() const

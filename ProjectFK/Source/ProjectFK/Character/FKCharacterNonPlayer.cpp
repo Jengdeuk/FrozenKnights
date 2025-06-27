@@ -16,6 +16,7 @@ AFKCharacterNonPlayer::AFKCharacterNonPlayer()
 {
 	NPCType = ENPCType::Warchief;
 	bPreparingActivate = false;
+	bAlreadayResourcesBound = false;
 
 	DeactivateDuration = 5.0f;
 
@@ -32,6 +33,7 @@ void AFKCharacterNonPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AFKCharacterNonPlayer, NPCType);
+	DOREPLIFETIME(AFKCharacterNonPlayer, bAlreadayResourcesBound);
 }
 
 void AFKCharacterNonPlayer::SetDead()
@@ -62,7 +64,7 @@ void AFKCharacterNonPlayer::ActivatePoolableMonster(uint32 InMonsterId, AFKMonst
 		bPreparingActivate = true;
 		MonsterId = InMonsterId;
 		PoolManager = InPoolManager;
-		MulticastRPCBindCharacterResources(NPCType);
+		BindCharacterResources();
 	}
 }
 
@@ -102,6 +104,7 @@ void AFKCharacterNonPlayer::Deactivate()
 
 	if (HasAuthority())
 	{
+		bAlreadayResourcesBound = false;
 		DeactiveTimerHandle.Invalidate();
 
 		AFKAIController* FKAIController = Cast<AFKAIController>(GetController());
@@ -112,46 +115,46 @@ void AFKCharacterNonPlayer::Deactivate()
 	}
 }
 
-void AFKCharacterNonPlayer::MulticastRPCBindCharacterResources_Implementation(ENPCType MobType)
+void AFKCharacterNonPlayer::BindCharacterResources()
 {
-	BindCharacterResources(MobType);
-}
+	if (HasAuthority())
+	{
+		bAlreadayResourcesBound = true;
+	}
 
-void AFKCharacterNonPlayer::BindCharacterResources(ENPCType MobType)
-{
 	bResourceBinds.FindOrAdd(EResourceType::Mesh) = false;
 	ResourceHandles.FindOrAdd(EResourceType::Mesh) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
-		Meshes[ResourceSets[MobType].MeshIndex],
+		Meshes[ResourceSets[NPCType].MeshIndex],
 		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::MeshLoadCompleted)
 	);
 
 	bResourceBinds.FindOrAdd(EResourceType::AnimInstance) = false;
 	ResourceHandles.FindOrAdd(EResourceType::AnimInstance) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
-		AnimInstances[ResourceSets[MobType].AnimInstanceIndex],
+		AnimInstances[ResourceSets[NPCType].AnimInstanceIndex],
 		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AnimLoadCompleted)
 	);
 
 	bResourceBinds.FindOrAdd(EResourceType::StartMontage) = false;
 	ResourceHandles.FindOrAdd(EResourceType::StartMontage) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
-		StartMontages[ResourceSets[MobType].StartMontageIndex],
+		StartMontages[ResourceSets[NPCType].StartMontageIndex],
 		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::StartMontageLoadCompleted)
 	);
 
 	bResourceBinds.FindOrAdd(EResourceType::AttackMontage) = false;
 	ResourceHandles.FindOrAdd(EResourceType::AttackMontage) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
-		AttackMontages[ResourceSets[MobType].AttackMontageIndex],
+		AttackMontages[ResourceSets[NPCType].AttackMontageIndex],
 		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::AttackMontageLoadCompleted)
 	);
 
 	bResourceBinds.FindOrAdd(EResourceType::DeadMontage) = false;
 	ResourceHandles.FindOrAdd(EResourceType::DeadMontage) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
-		DeadMontages[ResourceSets[MobType].DeadMontageIndex],
+		DeadMontages[ResourceSets[NPCType].DeadMontageIndex],
 		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::DeadMontageLoadCompleted)
 	);
 
 	bResourceBinds.FindOrAdd(EResourceType::ComboActionData) = false;
 	ResourceHandles.FindOrAdd(EResourceType::ComboActionData) = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
-		ComboActionDatas[ResourceSets[MobType].ComboActionDataIndex],
+		ComboActionDatas[ResourceSets[NPCType].ComboActionDataIndex],
 		FStreamableDelegate::CreateUObject(this, &AFKCharacterBase::ComboActionDataLoadCompleted)
 	);
 }
@@ -164,6 +167,16 @@ void AFKCharacterNonPlayer::OnBindResourcesCompleted()
 	{
 		DeferredActivate();
 	}
+}
+
+void AFKCharacterNonPlayer::OnRep_AlreadayResourcesBound()
+{
+	if (bAlreadayResourcesBound == false)
+	{
+		return;
+	}
+
+	BindCharacterResources();
 }
 
 float AFKCharacterNonPlayer::GetAIPatrolRadius()

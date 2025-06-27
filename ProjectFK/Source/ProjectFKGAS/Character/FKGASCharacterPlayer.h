@@ -34,6 +34,9 @@ protected:
 	void OnSpeedChanged(const FOnAttributeChangeData& ChangeData);
 
 	UFUNCTION()
+	void OnRepSpeedChanged(float ChangeValue);
+
+	UFUNCTION()
 	virtual void OnOutOfHealth();
 
 	virtual void SetDead() override;

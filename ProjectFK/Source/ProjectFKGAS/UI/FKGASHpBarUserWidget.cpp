@@ -25,6 +25,9 @@ void UFKGASHpBarUserWidget::SetAbilitySystemComponent(AActor* InOwner)
 		const UFKCharacterAttributeSet* CurrentAttributeSet = ASC->GetSet<UFKCharacterAttributeSet>();
 		if (CurrentAttributeSet)
 		{
+			CurrentAttributeSet->OnRepHealthChanged.AddDynamic(this, &ThisClass::OnRepHealthChanged);
+			CurrentAttributeSet->OnRepMaxHealthChanged.AddDynamic(this, &ThisClass::OnRepMaxHealthChanged);
+
 			CurrentHealth = CurrentAttributeSet->GetHealth();
 			CurrentMaxHealth = CurrentAttributeSet->GetMaxHealth();
 
@@ -45,6 +48,18 @@ void UFKGASHpBarUserWidget::OnHealthChanged(const FOnAttributeChangeData& Change
 void UFKGASHpBarUserWidget::OnMaxHealthChanged(const FOnAttributeChangeData& ChangeData)
 {
 	CurrentMaxHealth = ChangeData.NewValue;
+	UpdateHpBar();
+}
+
+void UFKGASHpBarUserWidget::OnRepHealthChanged(float ChangeValue)
+{
+	CurrentHealth = ChangeValue;
+	UpdateHpBar();
+}
+
+void UFKGASHpBarUserWidget::OnRepMaxHealthChanged(float ChangeValue)
+{
+	CurrentMaxHealth = ChangeValue;
 	UpdateHpBar();
 }
 

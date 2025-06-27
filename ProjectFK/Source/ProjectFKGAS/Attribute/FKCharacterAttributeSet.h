@@ -14,6 +14,11 @@
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOutOfHealthDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRepSpeedChangedDelegate, float, ChangeValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRepHealthChangedDelegate, float, ChangeValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRepMaxHealthChangedDelegate, float, ChangeValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRepStaminaChangedDelegate, float, ChangeValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRepMaxStaminaChangedDelegate, float, ChangeValue);
 
 /**
  * 
@@ -40,7 +45,15 @@ public:
 	virtual bool PreGameplayEffectExecute(struct FGameplayEffectModCallbackData& Data) override;
 	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
 
+public:
+	void SetRespawn();
+
 	mutable FOutOfHealthDelegate OnOutOfHealth;
+	mutable FOnRepSpeedChangedDelegate OnRepSpeedChanged;
+	mutable FOnRepHealthChangedDelegate OnRepHealthChanged;
+	mutable FOnRepMaxHealthChangedDelegate OnRepMaxHealthChanged;
+	mutable FOnRepStaminaChangedDelegate OnRepStaminaChanged;
+	mutable FOnRepMaxStaminaChangedDelegate OnRepMaxStaminaChanged;
 
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -54,23 +67,40 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Attack", Replicated, Meta = (AllowPrivateAccess = true))
 	FGameplayAttributeData AttackRate;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Movement", Replicated, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", ReplicatedUsing = "OnRep_SpeedChanged", Meta = (AllowPrivateAccess = true))
 	FGameplayAttributeData Speed;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Health", Replicated, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly, Category = "Health", ReplicatedUsing = "OnRep_HealthChanged", Meta = (AllowPrivateAccess = true))
 	FGameplayAttributeData Health;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Health", Replicated, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly, Category = "Health", ReplicatedUsing = "OnRep_MaxHealthChanged", Meta = (AllowPrivateAccess = true))
 	FGameplayAttributeData MaxHealth;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Stamina", Replicated, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly, Category = "Stamina", ReplicatedUsing = "OnRep_StaminaChanged", Meta = (AllowPrivateAccess = true))
 	FGameplayAttributeData Stamina;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Stamina", Replicated, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly, Category = "Stamina", ReplicatedUsing = "OnRep_MaxStaminaChanged", Meta = (AllowPrivateAccess = true))
 	FGameplayAttributeData MaxStamina;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Attack", Meta = (AllowPrivateAccess = true))
 	FGameplayAttributeData Damage;
 
-	bool bOutOfHealth = false;
+	UPROPERTY(Replicated)
+	bool bOutOfHealth;
+
+private:
+	UFUNCTION()
+	void OnRep_SpeedChanged();
+
+	UFUNCTION()
+	void OnRep_HealthChanged();
+
+	UFUNCTION()
+	void OnRep_MaxHealthChanged();
+
+	UFUNCTION()
+	void OnRep_StaminaChanged();
+
+	UFUNCTION()
+	void OnRep_MaxStaminaChanged();
 };

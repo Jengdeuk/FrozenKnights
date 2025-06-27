@@ -94,7 +94,7 @@ void AFKGASCharacterNonPlayer::Activate()
 			break;
 		}
 
-		AttributeSet->SetHealth(AttributeSet->GetMaxHealth());
+		AttributeSet->SetRespawn();
 
 		FGameplayTagContainer AllTags;
 		ASC->GetOwnedGameplayTags(AllTags);
@@ -164,6 +164,11 @@ void AFKGASCharacterNonPlayer::OnSpeedChanged(const FOnAttributeChangeData& Chan
 	GetCharacterMovement()->MaxWalkSpeed = ChangeData.NewValue;
 }
 
+void AFKGASCharacterNonPlayer::OnRepSpeedChanged(float ChangeValue)
+{
+	GetCharacterMovement()->MaxWalkSpeed = ChangeValue;
+}
+
 void AFKGASCharacterNonPlayer::SetGAS()
 {
 	ASC->InitAbilityActorInfo(this, this);
@@ -175,4 +180,5 @@ void AFKGASCharacterNonPlayer::SetGAS()
 
 	ASC->GetGameplayAttributeValueChangeDelegate(UFKCharacterAttributeSet::GetSpeedAttribute()).AddUObject(this, &ThisClass::OnSpeedChanged);
 	AttributeSet->OnOutOfHealth.AddDynamic(this, &ThisClass::OnOutOfHealth);
+	AttributeSet->OnRepSpeedChanged.AddDynamic(this, &ThisClass::OnRepSpeedChanged);
 }

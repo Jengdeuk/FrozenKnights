@@ -47,7 +47,7 @@ FGameplayAbilityTargetDataHandle AFKTA_Trace::MakeTargetData() const
 		return FGameplayAbilityTargetDataHandle();
 	}
 
-	FHitResult OutHitResult;
+	TArray<FHitResult> OutHitResults;
 	const float AttackRange = AttributeSet->GetAttackRange();
 	const float AttackRadius = AttributeSet->GetAttackRadius();
 
@@ -65,13 +65,16 @@ FGameplayAbilityTargetDataHandle AFKTA_Trace::MakeTargetData() const
 	{
 		ColChannel = CCHANNEL_FKMOBATTACK;
 	}
-	bool HitDetected = GetWorld()->SweepSingleByChannel(OutHitResult, Start, End, FQuat::Identity, ColChannel, FCollisionShape::MakeSphere(AttackRadius), Params);
+	bool HitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ColChannel, FCollisionShape::MakeSphere(AttackRadius), Params);
 
 	FGameplayAbilityTargetDataHandle DataHandle;
 	if (HitDetected)
 	{
-		FGameplayAbilityTargetData_SingleTargetHit* TargetData = new FGameplayAbilityTargetData_SingleTargetHit(OutHitResult);
-		DataHandle.Add(TargetData);
+		for (const FHitResult& OutHitResult : OutHitResults)
+		{
+			FGameplayAbilityTargetData_SingleTargetHit* TargetData = new FGameplayAbilityTargetData_SingleTargetHit(OutHitResult);
+			DataHandle.Add(TargetData);
+		}
 	}
 
 #if ENABLE_DRAW_DEBUG

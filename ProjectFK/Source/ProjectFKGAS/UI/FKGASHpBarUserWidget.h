@@ -21,6 +21,13 @@ public:
 protected:
 	virtual void OnHealthChanged(const FOnAttributeChangeData& ChangeData);
 	virtual void OnMaxHealthChanged(const FOnAttributeChangeData& ChangeData);
+
+	UFUNCTION()
+	virtual void OnRepHealthChanged(float ChangeValue);
+
+	UFUNCTION()
+	virtual void OnRepMaxHealthChanged(float ChangeValue);
+
 	virtual void OnInvinsibleTagChanged(const FGameplayTag CallBackTag, int32 NewCount);
 
 	void UpdateHpBar();

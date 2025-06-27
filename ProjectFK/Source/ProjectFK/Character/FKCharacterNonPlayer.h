@@ -69,6 +69,9 @@ protected:
 	UPROPERTY(Replicated)
 	ENPCType NPCType;
 
+	UPROPERTY(ReplicatedUsing = "OnRep_AlreadayResourcesBound")
+	bool bAlreadayResourcesBound;
+
 // Resource Section
 protected:
 	UPROPERTY(config)
@@ -93,10 +96,11 @@ protected:
 	TMap<ENPCType, FResourceSet> ResourceSets;
 
 public:
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastRPCBindCharacterResources(ENPCType MobType);
-	void BindCharacterResources(ENPCType MobType);
+	void BindCharacterResources();
 	virtual void OnBindResourcesCompleted() override;
+
+	UFUNCTION()
+	void OnRep_AlreadayResourcesBound();
 
 // AI Section
 protected:
