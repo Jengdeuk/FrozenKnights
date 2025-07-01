@@ -4,6 +4,9 @@
 #include "GA/FKGA_AttackHitCheck.h"
 #include "AT/FKAT_Trace.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "Tag/FKGameplayTag.h"
+#include "AbilitySystemComponent.h"
+#include "Character/FKCharacterBase.h"
 
 UFKGA_AttackHitCheck::UFKGA_AttackHitCheck()
 {
@@ -40,7 +43,19 @@ void UFKGA_AttackHitCheck::OnTraceResultCallback(const FGameplayAbilityTargetDat
 			FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(AttackDamageEffect, CurrentLevel);
 			if (EffectSpecHandle.IsValid())
 			{
+				// 대미지 주기
 				ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle, TargetDataHandle);
+
+				// 피격 이펙트 소환
+				AFKCharacterBase* Character = Cast<AFKCharacterBase>(HitResult.GetActor());
+				if (Character && Character->IsPlayerCharacter() == false)
+				{
+					FGameplayEffectContextHandle CueContextHandle = UAbilitySystemBlueprintLibrary::GetEffectContext(EffectSpecHandle);
+					CueContextHandle.AddHitResult(HitResult);
+					FGameplayCueParameters CueParam;
+					CueParam.EffectContext = CueContextHandle;
+					TargetASC->ExecuteGameplayCue(GAMEPLAYCUE_CHARACTER_ATTACKHIT_KNIGHT, CueParam);
+				}
 			}
 		}
 	}
