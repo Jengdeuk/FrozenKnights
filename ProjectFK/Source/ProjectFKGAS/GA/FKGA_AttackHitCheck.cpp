@@ -10,7 +10,7 @@
 
 UFKGA_AttackHitCheck::UFKGA_AttackHitCheck()
 {
-	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
+	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerExecution;
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::ServerOnly;
 }
 
@@ -56,6 +56,24 @@ void UFKGA_AttackHitCheck::OnTraceResultCallback(const FGameplayAbilityTargetDat
 					CueParam.EffectContext = CueContextHandle;
 					TargetASC->ExecuteGameplayCue(GAMEPLAYCUE_CHARACTER_ATTACKHIT_KNIGHT, CueParam);
 				}
+			}
+		}
+		else if (UAbilitySystemBlueprintLibrary::TargetDataHasActor(TargetDataHandle, i))
+		{
+			UAbilitySystemComponent* SourceASC = GetAbilitySystemComponentFromActorInfo_Checked();
+
+			FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(AttackDamageEffect, CurrentLevel);
+			if (EffectSpecHandle.IsValid())
+			{
+				// 대미지 주기
+				ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle, TargetDataHandle);
+
+				// 피격 이펙트 소환
+				FGameplayEffectContextHandle CueContextHandle = UAbilitySystemBlueprintLibrary::GetEffectContext(EffectSpecHandle);
+				CueContextHandle.AddActors(TargetDataHandle.Data[i].Get()->GetActors(), false);
+				FGameplayCueParameters CueParam;
+				CueParam.EffectContext = CueContextHandle;
+				SourceASC->ExecuteGameplayCue(GAMEPLAYCUE_CHARACTER_ATTACKHIT_KNIGHT, CueParam);
 			}
 		}
 	}

@@ -13,6 +13,7 @@
 
 AFKTA_Trace::AFKTA_Trace()
 {
+	bShowDebug = true;
 }
 
 void AFKTA_Trace::StartTargeting(UGameplayAbility* Ability)
@@ -20,6 +21,8 @@ void AFKTA_Trace::StartTargeting(UGameplayAbility* Ability)
 	Super::StartTargeting(Ability);
 
 	SourceActor = Ability->GetCurrentActorInfo()->AvatarActor.Get();
+
+	ConfirmTargeting();
 }
 
 void AFKTA_Trace::ConfirmTargetingAndContinue()
@@ -84,7 +87,16 @@ FGameplayAbilityTargetDataHandle AFKTA_Trace::MakeTargetData() const
 		FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
 		float CapsuleHalfHeight = AttackRange * 0.5f;
 		FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
-		DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(Forward).ToQuat(), DrawColor, false, 1.0f);
+		DrawDebugCapsule(
+			GetWorld(),
+			CapsuleOrigin,
+			CapsuleHalfHeight,
+			AttackRadius,
+			FRotationMatrix::MakeFromZ(Forward).ToQuat(),
+			DrawColor,
+			false,
+			1.0f
+		);
 	}
 
 #endif

@@ -20,8 +20,7 @@ AFKCharacterBase::AFKCharacterBase()
 	bDead = true;
 	bActive = false;
 	bReplicates = true;
-	bAlwaysRelevant = true; // 모든 클라이언트에게 항상 복제
-	//NetDormancy = DORM_Never; // 절대 Dormant 상태로 가지 않음
+	bAlwaysRelevant = true;
 
 	// Pawn
 	bUseControllerRotationPitch = false;

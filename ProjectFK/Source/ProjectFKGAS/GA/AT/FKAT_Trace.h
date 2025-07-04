@@ -21,7 +21,7 @@ public:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Ability|Tasks", meta = (DisplayName = "WaitForTrace", HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE"))
-	static UFKAT_Trace* CreateTask(UGameplayAbility* OwningAbility, TSubclassOf<class AFKTA_Trace> TargetActorClass);
+	static UFKAT_Trace* CreateTask(UGameplayAbility* OwningAbility, TSubclassOf<class AGameplayAbilityTargetActor> TargetActorClass);
 	virtual void Activate() override;
 	virtual void OnDestroy(bool AbilityEnded) override;
 
@@ -37,8 +37,8 @@ public:
 
 protected:
 	UPROPERTY()
-	TSubclassOf<class AFKTA_Trace> TargetActorClass;
+	TSubclassOf<class AGameplayAbilityTargetActor> TargetActorClass;
 
 	UPROPERTY()
-	TObjectPtr<class AFKTA_Trace> SpawnedTargetActor;
+	TObjectPtr<class AGameplayAbilityTargetActor> SpawnedTargetActor;
 };

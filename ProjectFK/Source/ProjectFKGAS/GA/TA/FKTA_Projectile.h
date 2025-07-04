@@ -18,13 +18,24 @@ public:
 	AFKTA_Projectile();
 
 public:
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
+
+public:
 	virtual void StartTargeting(UGameplayAbility* Ability) override;
+
+	UFUNCTION()
+	void OnTimerFinished();
+	virtual void ConfirmTargeting() override;
 	virtual void ConfirmTargetingAndContinue() override;
 	void SetShowDebug(bool InShowDebug) { bShowDebug = InShowDebug; }
 
 protected:
+	UFUNCTION()
+    void OnProjectileOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
     UFUNCTION()
-    void OnProjectileImpact(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+    void OnProjectileHitWall(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 private:
     UPROPERTY(VisibleAnywhere)
@@ -33,6 +44,12 @@ private:
     UPROPERTY(VisibleAnywhere)
     class USphereComponent* CollisionComponent;
 
+	UPROPERTY()
+	TObjectPtr<class AFKFXActor_Projectile> FXActor;
+
 private:
+	FGameplayAbilityTargetDataHandle DataHandle;
+	FTimerHandle ConfirmTimerHandle;
+	bool bHasConfirmed;
 	bool bShowDebug;
 };

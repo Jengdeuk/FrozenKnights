@@ -33,5 +33,5 @@ protected:
 	float CurrentLevel;
 
 	UPROPERTY(EditAnywhere, Category = "GAS")
-	TSubclassOf<class AFKTA_Trace> TargetActorClass;
+	TSubclassOf<class AGameplayAbilityTargetActor> TargetActorClass;
 };
