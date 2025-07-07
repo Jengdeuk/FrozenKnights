@@ -19,6 +19,7 @@ public:
 public:
 	virtual void BeginPlay() override;
 	void ResetHealth();
+	virtual void SetPlayerClass(const EPlayerClass& InPlayerClass) override;
 
 public:
 	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;

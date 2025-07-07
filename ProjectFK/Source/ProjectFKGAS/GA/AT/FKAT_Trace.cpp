@@ -9,7 +9,7 @@ UFKAT_Trace::UFKAT_Trace()
 {
 }
 
-UFKAT_Trace* UFKAT_Trace::CreateTask(UGameplayAbility* OwningAbility, TSubclassOf<class AGameplayAbilityTargetActor> TargetActorClass)
+UFKAT_Trace* UFKAT_Trace::CreateTask(UGameplayAbility* OwningAbility, TSubclassOf<class AFKTA_Trace> TargetActorClass)
 {
 	UFKAT_Trace* NewTask = NewAbilityTask<UFKAT_Trace>(OwningAbility);
 	NewTask->TargetActorClass = TargetActorClass;
@@ -38,7 +38,7 @@ void UFKAT_Trace::OnDestroy(bool AbilityEnded)
 
 void UFKAT_Trace::SpawnAndInitializeTargetActor()
 {
-	SpawnedTargetActor = Ability->GetWorld()->SpawnActorDeferred<AGameplayAbilityTargetActor>(
+	SpawnedTargetActor = Ability->GetWorld()->SpawnActorDeferred<AFKTA_Trace>(
 		TargetActorClass,
 		FTransform::Identity,
 		nullptr,
@@ -48,6 +48,7 @@ void UFKAT_Trace::SpawnAndInitializeTargetActor()
 
 	if (SpawnedTargetActor)
 	{
+		SpawnedTargetActor->SetShowDebug(true);
 		SpawnedTargetActor->TargetDataReadyDelegate.AddUObject(this, &UFKAT_Trace::OnTargetDataReadyCallback);
 	}
 }

@@ -58,6 +58,17 @@ void AFKGASCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	SetupGASInputComponent();
 }
 
+void AFKGASCharacterPlayer::SummonCastMageEffect()
+{
+	AFKGASPlayerState* GASPS = Cast<AFKGASPlayerState>(GetPlayerState());
+	if (GASPS && GASPS->GetPlayerClass() == EPlayerClass::Mage)
+	{
+		FGameplayCueParameters CueParam;
+		CueParam.Location = GetActorLocation();
+		ASC->ExecuteGameplayCue(GAMEPLAYCUE_CHARACTER_CAST_MAGE, CueParam);
+	}
+}
+
 void AFKGASCharacterPlayer::SetupGASInputComponent()
 {
 	if (IsValid(ASC) && IsValid(InputComponent))

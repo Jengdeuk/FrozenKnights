@@ -13,7 +13,8 @@
 
 AFKTA_Trace::AFKTA_Trace()
 {
-	bShowDebug = true;
+	bHasConfirmed = false;
+	bShowDebug = false;
 }
 
 void AFKTA_Trace::StartTargeting(UGameplayAbility* Ability)
@@ -21,85 +22,11 @@ void AFKTA_Trace::StartTargeting(UGameplayAbility* Ability)
 	Super::StartTargeting(Ability);
 
 	SourceActor = Ability->GetCurrentActorInfo()->AvatarActor.Get();
-
-	ConfirmTargeting();
 }
 
-void AFKTA_Trace::ConfirmTargetingAndContinue()
+void AFKTA_Trace::ConfirmTargeting()
 {
-	if (SourceActor)
-	{
-		FGameplayAbilityTargetDataHandle DataHandle = MakeTargetData();
-		TargetDataReadyDelegate.Broadcast(DataHandle);
-	}
-}
+	Super::ConfirmTargeting();
 
-FGameplayAbilityTargetDataHandle AFKTA_Trace::MakeTargetData() const
-{
-	ACharacter* Character = CastChecked<ACharacter>(SourceActor);
-
-	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(SourceActor);
-	if (!ASC)
-	{
-		return FGameplayAbilityTargetDataHandle();
-	}
-
-	const UFKCharacterAttributeSet* AttributeSet = ASC->GetSet<UFKCharacterAttributeSet>();
-	if (!AttributeSet)
-	{
-		return FGameplayAbilityTargetDataHandle();
-	}
-
-	TArray<FHitResult> OutHitResults;
-	const float AttackRange = AttributeSet->GetAttackRange();
-	const float AttackRadius = AttributeSet->GetAttackRadius();
-
-	FCollisionQueryParams Params(SCENE_QUERY_STAT(UFKTA_Trace), false, Character);
-	const FVector Forward = Character->GetActorForwardVector();
-	const FVector Start = Character->GetActorLocation() + Forward * Character->GetCapsuleComponent()->GetScaledCapsuleRadius();
-	const FVector End = Start + Forward * AttackRange;
-
-	ECollisionChannel ColChannel;
-	if (CastChecked<AFKCharacterBase>(Character)->IsPlayerCharacter())
-	{
-		ColChannel = CCHANNEL_FKACTION;
-	}
-	else
-	{
-		ColChannel = CCHANNEL_FKMOBATTACK;
-	}
-	bool HitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ColChannel, FCollisionShape::MakeSphere(AttackRadius), Params);
-
-	FGameplayAbilityTargetDataHandle DataHandle;
-	if (HitDetected)
-	{
-		for (const FHitResult& OutHitResult : OutHitResults)
-		{
-			FGameplayAbilityTargetData_SingleTargetHit* TargetData = new FGameplayAbilityTargetData_SingleTargetHit(OutHitResult);
-			DataHandle.Add(TargetData);
-		}
-	}
-
-#if ENABLE_DRAW_DEBUG
-
-	if (bShowDebug)
-	{
-		FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
-		float CapsuleHalfHeight = AttackRange * 0.5f;
-		FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
-		DrawDebugCapsule(
-			GetWorld(),
-			CapsuleOrigin,
-			CapsuleHalfHeight,
-			AttackRadius,
-			FRotationMatrix::MakeFromZ(Forward).ToQuat(),
-			DrawColor,
-			false,
-			1.0f
-		);
-	}
-
-#endif
-
-	return DataHandle;
+	bHasConfirmed = true;
 }

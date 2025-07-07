@@ -82,7 +82,7 @@ AFKCharacterPlayer::AFKCharacterPlayer()
 	// Collider Component
 	CharacterOverlapDetector = CreateDefaultSubobject<USphereComponent>(TEXT("CharacterOverlapDetector"));
 	CharacterOverlapDetector->SetupAttachment(RootComponent);
-	CharacterOverlapDetector->SetSphereRadius(1100.0f); // HPBar 표시 범위
+	CharacterOverlapDetector->SetSphereRadius(1250.0f); // HPBar 표시 범위
 	CharacterOverlapDetector->SetCollisionProfileName(CPROFILE_FKCHARACTEROVERLAPDETECTOR);
 	CharacterOverlapDetector->SetGenerateOverlapEvents(true);
 	CharacterOverlapDetector->SetShouldUpdatePhysicsVolume(false);
@@ -186,6 +186,8 @@ void AFKCharacterPlayer::ServerRPCPlayAttackMontage_Implementation()
 			}
 		}
 	}
+
+	SummonCastMageEffect();
 }
 
 void AFKCharacterPlayer::ClientRPCPlayAttackMontage_Implementation(AFKCharacterPlayer* CharacterToPlay)
@@ -217,6 +219,8 @@ void AFKCharacterPlayer::ServerRPCMontageJumpToSection_Implementation(FName Sect
 			}
 		}
 	}
+
+	SummonCastMageEffect();
 }
 
 void AFKCharacterPlayer::ClientRPCMontageJumpToSection_Implementation(AFKCharacterPlayer* CharacterToPlay, FName SectionName)
@@ -238,6 +242,10 @@ void AFKCharacterPlayer::JumpMontageToSection(FName SectionName)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	AnimInstance->Montage_JumpToSection(SectionName);
+}
+
+void AFKCharacterPlayer::SummonCastMageEffect()
+{
 }
 
 void AFKCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterControlType)

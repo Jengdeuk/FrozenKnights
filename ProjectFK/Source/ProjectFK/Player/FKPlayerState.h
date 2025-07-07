@@ -24,7 +24,7 @@ public:
 
 public:
 	FORCEINLINE const EPlayerClass& GetPlayerClass() const { return PlayerClass; }
-	FORCEINLINE void SetPlayerClass(const EPlayerClass& InPlayerClass) { PlayerClass = InPlayerClass; }
+	virtual void SetPlayerClass(const EPlayerClass& InPlayerClass);
 
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

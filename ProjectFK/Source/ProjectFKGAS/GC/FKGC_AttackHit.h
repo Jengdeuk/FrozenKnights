@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "GameplayCueNotify_Static.h"
-#include "FKGC_AttackHit_Knight.generated.h"
+#include "FKGC_AttackHit.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTFKGAS_API UFKGC_AttackHit_Knight : public UGameplayCueNotify_Static
+class PROJECTFKGAS_API UFKGC_AttackHit : public UGameplayCueNotify_Static
 {
 	GENERATED_BODY()
 	
 public:
-	UFKGC_AttackHit_Knight();
+	UFKGC_AttackHit();
 
 public:
 	virtual bool OnExecute_Implementation(AActor* Target, const FGameplayCueParameters& Parameters) const override;

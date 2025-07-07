@@ -7,6 +7,8 @@
 #include "Tag/FKGameplayTag.h"
 #include "AbilitySystemComponent.h"
 #include "Character/FKCharacterBase.h"
+#include "Player/FKGASPlayerState.h"
+#include "Components/CapsuleComponent.h"
 
 UFKGA_AttackHitCheck::UFKGA_AttackHitCheck()
 {
@@ -23,6 +25,25 @@ void UFKGA_AttackHitCheck::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 	UFKAT_Trace* AttackTraceTask = UFKAT_Trace::CreateTask(this, TargetActorClass);
 	AttackTraceTask->OnComplete.AddDynamic(this, &UFKGA_AttackHitCheck::OnTraceResultCallback);
 	AttackTraceTask->ReadyForActivation();
+
+	// 소환 이펙트 소환
+	if (UAbilitySystemComponent* SourceASC = GetAbilitySystemComponentFromActorInfo_Checked())
+	{
+		AFKCharacterBase* Character = Cast<AFKCharacterBase>(SourceASC->GetAvatarActor());
+		if (Character && Character->IsPlayerCharacter())
+		{
+			AFKGASPlayerState* GASPS = Cast<AFKGASPlayerState>(SourceASC->GetOwnerActor());
+			if (GASPS && GASPS->GetPlayerClass() == EPlayerClass::Mage)
+			{
+				FGameplayCueParameters CueParam;
+				CueParam.Location =
+					Character->GetActorLocation()
+					+ Character->GetActorForwardVector() * 2.f * Character->GetCapsuleComponent()->GetScaledCapsuleRadius()
+					+ FVector(0, 0, 40);
+				SourceASC->ExecuteGameplayCue(GAMEPLAYCUE_CHARACTER_MUZZLEFLASH_MAGE, CueParam);
+			}
+		}
+	}
 }
 
 void UFKGA_AttackHitCheck::OnTraceResultCallback(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
@@ -54,7 +75,21 @@ void UFKGA_AttackHitCheck::OnTraceResultCallback(const FGameplayAbilityTargetDat
 					CueContextHandle.AddHitResult(HitResult);
 					FGameplayCueParameters CueParam;
 					CueParam.EffectContext = CueContextHandle;
-					TargetASC->ExecuteGameplayCue(GAMEPLAYCUE_CHARACTER_ATTACKHIT_KNIGHT, CueParam);
+
+					FGameplayTag Tag;
+					if (AFKGASPlayerState* GASPS = Cast<AFKGASPlayerState>(SourceASC->GetOwnerActor()))
+					{
+						switch (GASPS->GetPlayerClass())
+						{
+						case EPlayerClass::Knight:
+							Tag = GAMEPLAYCUE_CHARACTER_ATTACKHIT_KNIGHT;
+							break;
+						case EPlayerClass::Mage:
+							Tag = GAMEPLAYCUE_CHARACTER_ATTACKHIT_MAGE;
+							break;
+						}
+					}
+					TargetASC->ExecuteGameplayCue(Tag, CueParam);
 				}
 			}
 		}
@@ -73,7 +108,21 @@ void UFKGA_AttackHitCheck::OnTraceResultCallback(const FGameplayAbilityTargetDat
 				CueContextHandle.AddActors(TargetDataHandle.Data[i].Get()->GetActors(), false);
 				FGameplayCueParameters CueParam;
 				CueParam.EffectContext = CueContextHandle;
-				SourceASC->ExecuteGameplayCue(GAMEPLAYCUE_CHARACTER_ATTACKHIT_KNIGHT, CueParam);
+
+				FGameplayTag Tag;
+				if (AFKGASPlayerState* GASPS = Cast<AFKGASPlayerState>(SourceASC->GetOwnerActor()))
+				{
+					switch (GASPS->GetPlayerClass())
+					{
+					case EPlayerClass::Knight:
+						Tag = GAMEPLAYCUE_CHARACTER_ATTACKHIT_KNIGHT;
+						break;
+					case EPlayerClass::Mage:
+						Tag = GAMEPLAYCUE_CHARACTER_ATTACKHIT_MAGE;
+						break;
+					}
+				}
+				SourceASC->ExecuteGameplayCue(Tag, CueParam);
 			}
 		}
 	}

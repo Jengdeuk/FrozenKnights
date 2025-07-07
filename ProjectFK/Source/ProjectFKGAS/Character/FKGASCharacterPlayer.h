@@ -26,6 +26,9 @@ public:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+public:
+	virtual void SummonCastMageEffect() override;
+
 protected:
 	void SetupGASInputComponent();
 	void GASInputPressed(int32 InputId);

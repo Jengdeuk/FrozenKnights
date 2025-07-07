@@ -13,6 +13,11 @@ AFKPlayerState::AFKPlayerState()
 	bReplicates = true;
 }
 
+void AFKPlayerState::SetPlayerClass(const EPlayerClass& InPlayerClass)
+{
+	PlayerClass = InPlayerClass;
+}
+
 void AFKPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

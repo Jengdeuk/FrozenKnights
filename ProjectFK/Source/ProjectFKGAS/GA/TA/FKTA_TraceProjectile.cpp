@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "FKTA_Projectile.h"
+#include "GA/TA/FKTA_TraceProjectile.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "Physics/FKCollision.h"
@@ -11,11 +11,10 @@
 #include "Components/SphereComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "FX/FKFXActor_Projectile.h"
+#include "Tag/FKGameplayTag.h"
 
-AFKTA_Projectile::AFKTA_Projectile()
+AFKTA_TraceProjectile::AFKTA_TraceProjectile()
 {
-    bHasConfirmed = false;
-	bShowDebug = true;
     PrimaryActorTick.bCanEverTick = true;
     PrimaryActorTick.bStartWithTickEnabled = true;
 
@@ -31,14 +30,14 @@ AFKTA_Projectile::AFKTA_Projectile()
     // 이동 컴포넌트 생성
     ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComp"));
     ProjectileMovement->UpdatedComponent = RootComponent;
-    ProjectileMovement->InitialSpeed = 1200.f;
-    ProjectileMovement->MaxSpeed = 1200.f;
+    ProjectileMovement->InitialSpeed = 1500.f;
+    ProjectileMovement->MaxSpeed = 1500.f;
     ProjectileMovement->bRotationFollowsVelocity = true;
     ProjectileMovement->bShouldBounce = false;
     ProjectileMovement->ProjectileGravityScale = 0.f;
 }
 
-void AFKTA_Projectile::BeginPlay()
+void AFKTA_TraceProjectile::BeginPlay()
 {
     Super::BeginPlay();
 
@@ -54,7 +53,7 @@ void AFKTA_Projectile::BeginPlay()
     }
 }
 
-void AFKTA_Projectile::Tick(float DeltaSeconds)
+void AFKTA_TraceProjectile::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
 
@@ -80,11 +79,9 @@ void AFKTA_Projectile::Tick(float DeltaSeconds)
 #endif
 }
 
-void AFKTA_Projectile::StartTargeting(UGameplayAbility* Ability)
+void AFKTA_TraceProjectile::StartTargeting(UGameplayAbility* Ability)
 {
-	Super::StartTargeting(Ability);
-
-	SourceActor = Ability->GetCurrentActorInfo()->AvatarActor.Get();
+    Super::StartTargeting(Ability);
 
     ACharacter* Character = CastChecked<ACharacter>(SourceActor);
     const FVector Forward = Character->GetActorForwardVector();
@@ -112,20 +109,13 @@ void AFKTA_Projectile::StartTargeting(UGameplayAbility* Ability)
     GetWorld()->GetTimerManager().SetTimer(ConfirmTimerHandle, this, &ThisClass::OnTimerFinished, 5.0f, false);
 }
 
-void AFKTA_Projectile::OnTimerFinished()
+void AFKTA_TraceProjectile::OnTimerFinished()
 {
     ConfirmTimerHandle.Invalidate();
     ConfirmTargeting();
 }
 
-void AFKTA_Projectile::ConfirmTargeting()
-{
-    Super::ConfirmTargeting();
-
-    bHasConfirmed = true;
-}
-
-void AFKTA_Projectile::ConfirmTargetingAndContinue()
+void AFKTA_TraceProjectile::ConfirmTargetingAndContinue()
 {
     if (SourceActor)
     {
@@ -138,21 +128,18 @@ void AFKTA_Projectile::ConfirmTargetingAndContinue()
     }
 }
 
-void AFKTA_Projectile::OnProjectileOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AFKTA_TraceProjectile::OnProjectileOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
     if (bHasConfirmed || OtherActor->IsA<AFKCharacterBase>() == false || OtherActor == SourceActor || Cast<AFKCharacterBase>(OtherActor)->IsPlayerCharacter())
     {
         return;
     }
 
-    // SweepResult가 비정상일 경우를 대비
     bool bValidSweep = SweepResult.Component.IsValid() && !SweepResult.Normal.IsNearlyZero();
     if (bValidSweep)
     {
         FGameplayAbilityTargetData_SingleTargetHit* TargetData = new FGameplayAbilityTargetData_SingleTargetHit(SweepResult);
         DataHandle.Add(TargetData);
-
-        //UE_LOG(LogTemp, Warning, TEXT("[TA] Created TargetData with SweepResult: %s"), *SweepResult.ImpactPoint.ToString());
     }
     else
     {
@@ -162,19 +149,32 @@ void AFKTA_Projectile::OnProjectileOverlap(UPrimitiveComponent* OverlappedCompon
         FGameplayAbilityTargetData_ActorArray* ActorsData = new FGameplayAbilityTargetData_ActorArray();
         ActorsData->SetActors(HitActors);
         DataHandle = FGameplayAbilityTargetDataHandle(ActorsData);
-
-        //UE_LOG(LogTemp, Warning, TEXT("[TA] Created Fallback TargetData at %s"), *GetActorLocation().ToString());
     }
 
     ConfirmTargeting();
 }
 
-void AFKTA_Projectile::OnProjectileHitWall(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void AFKTA_TraceProjectile::OnProjectileHitWall(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
     if (bHasConfirmed)
     {
         return;
     }
+
+    ACharacter* Character = CastChecked<ACharacter>(SourceActor);
+
+    UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(SourceActor);
+    if (!ASC)
+    {
+        return;
+    }
+
+    // 이펙트 소환
+    FGameplayEffectContextHandle CueContextHandle = ASC->MakeEffectContext();
+    CueContextHandle.AddHitResult(Hit);
+    FGameplayCueParameters CueParam;
+    CueParam.EffectContext = CueContextHandle;
+    ASC->ExecuteGameplayCue(GAMEPLAYCUE_CHARACTER_ATTACKHIT_MAGE, CueParam);
 
     ConfirmTargeting();
 }

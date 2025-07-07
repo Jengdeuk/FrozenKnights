@@ -19,11 +19,10 @@ public:
 
 public:
 	virtual void StartTargeting(UGameplayAbility* Ability) override;
-	virtual void ConfirmTargetingAndContinue() override;
+	virtual void ConfirmTargeting() override;
 	void SetShowDebug(bool InShowDebug) { bShowDebug = InShowDebug; }
 
 protected:
-	virtual FGameplayAbilityTargetDataHandle MakeTargetData() const;
-
+	bool bHasConfirmed;
 	bool bShowDebug;
 };

@@ -41,8 +41,9 @@ public:
 	void ClientRPCMontageJumpToSection(AFKCharacterPlayer* CharacterToPlay, FName SectionName);
 
 	void PlayAttackMontage();
-
 	void JumpMontageToSection(FName SectionName);
+
+	virtual void SummonCastMageEffect();
 
 // Character Control Section
 protected:

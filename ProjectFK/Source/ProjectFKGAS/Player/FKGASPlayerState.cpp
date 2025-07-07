@@ -16,13 +16,32 @@ void AFKGASPlayerState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AttributeSet->SetMaxHealth(10000.0f);
 	ResetHealth();
 }
 
 void AFKGASPlayerState::ResetHealth()
 {
 	AttributeSet->SetRespawn();
+}
+
+void AFKGASPlayerState::SetPlayerClass(const EPlayerClass& InPlayerClass)
+{
+	Super::SetPlayerClass(InPlayerClass);
+
+	switch (PlayerClass)
+	{
+	case EPlayerClass::Knight:
+		AttributeSet->SetMaxHealth(10000.0f);
+		AttributeSet->SetAttackRate(30.0f);
+		AttributeSet->SetAttackRadius(200.0f);
+		break;
+	case EPlayerClass::Mage:
+		AttributeSet->SetMaxHealth(4000.0f);
+		AttributeSet->SetAttackRate(50.0f);
+		break;
+	}
+
+	ResetHealth();
 }
 
 UAbilitySystemComponent* AFKGASPlayerState::GetAbilitySystemComponent() const
