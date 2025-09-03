@@ -22,22 +22,22 @@ struct FResourceSet
 	GENERATED_BODY()
 
 	UPROPERTY()
-	uint8 MeshIndex;
+	uint8 MeshIndex = 0;
 
 	UPROPERTY()
-	uint8 AnimInstanceIndex;
+	uint8 AnimInstanceIndex = 0;
 
 	UPROPERTY()
-	uint8 StartMontageIndex;
+	uint8 StartMontageIndex = 0;
 
 	UPROPERTY()
-	uint8 AttackMontageIndex;
+	uint8 AttackMontageIndex = 0;
 
 	UPROPERTY()
-	uint8 DeadMontageIndex;
+	uint8 DeadMontageIndex = 0;
 
 	UPROPERTY()
-	uint8 ComboActionDataIndex;
+	uint8 ComboActionDataIndex = 0;
 };
 
 UCLASS(config = ProjectFK)

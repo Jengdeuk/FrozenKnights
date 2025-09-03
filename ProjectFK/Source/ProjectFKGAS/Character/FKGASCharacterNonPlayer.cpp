@@ -172,10 +172,14 @@ void AFKGASCharacterNonPlayer::OnRepSpeedChanged(float ChangeValue)
 void AFKGASCharacterNonPlayer::SetGAS()
 {
 	ASC->InitAbilityActorInfo(this, this);
-	for (const auto& StartAbility : StartAbilities)
+
+	if (HasAuthority())
 	{
-		FGameplayAbilitySpec StartSpec(StartAbility);
-		ASC->GiveAbility(StartSpec);
+		for (const auto& StartAbility : StartAbilities)
+		{
+			FGameplayAbilitySpec StartSpec(StartAbility);
+			ASC->GiveAbility(StartSpec);
+		}
 	}
 
 	ASC->GetGameplayAttributeValueChangeDelegate(UFKCharacterAttributeSet::GetSpeedAttribute()).AddUObject(this, &ThisClass::OnSpeedChanged);

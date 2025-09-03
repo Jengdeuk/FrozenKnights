@@ -55,21 +55,21 @@ void AFKMenuPlayerController::CreateServer()
 
 	//IOnlineSubsystem* OSS = IOnlineSubsystem::Get();
 	//if (!OSS) return;
-
+	//
 	//IOnlineSessionPtr Session = OSS->GetSessionInterface();
 	//if (!Session.IsValid()) return;
-
+	//
 	//// NAME_GameSession 이름의 세션이 존재하는지 검사하여 파괴
 	//if (FNamedOnlineSession* ExistingSession = Session->GetNamedSession(NAME_GameSession))
 	//{
 	//	Session->DestroySession(NAME_GameSession);
 	//	LOG_SCREEN("Destroy session: %s", NAME_GameSession);
 	//}
-
+	//
 	//// 델리게이트 연결
 	////Session->AddOnCreateSessionCompleteDelegate_Handle(CreateSessionComplete);
 	//Session->OnCreateSessionCompleteDelegates.AddUObject(this, &AFKMenuPlayerController::OnCreateSessionComplete);
-
+	//
 	//TSharedPtr<FOnlineSessionSettings> SessionSettings = MakeShareable(new FOnlineSessionSettings());
 	//SessionSettings->NumPublicConnections = 4;		// 허용되는 플레이어 수
 	//SessionSettings->bShouldAdvertise = true;		// 광고되는 세션인지 개인 세션인지
@@ -79,11 +79,11 @@ void AFKMenuPlayerController::CreateServer()
 	//SessionSettings->bUsesPresence = true;			// Presence 사용 (유저 정보에 세션 정보를 표시하는듯)
 	//SessionSettings->bAllowJoinViaPresence = true;	// Presence를 통해 참여 허용
 	//SessionSettings->bUseLobbiesIfAvailable = true; // 플랫폼이 지원하는 경우 로비 API 사용
-
+	//
 	//// FOnlineSessionSettings() 코드 참고
 	//// 세션의 MatchType을 모두에게 열림, 온라인 서비스와 핑 데이터를 통해 세션 홍보 옵션으로 설정
 	//SessionSettings->Set(FName("MatchType"), FString("FreeForAll"), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-
+	//
 	//// 세션 생성
 	//if (const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController())
 	//	Session->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *SessionSettings);
@@ -95,25 +95,25 @@ void AFKMenuPlayerController::JoinServer()
 
 	//IOnlineSubsystem* OSS = IOnlineSubsystem::Get();
 	//if (!OSS) return;
-
+	//
 	//SessionSearch = MakeShareable(new FOnlineSessionSearch());
 	//SessionSearch->bIsLanQuery = false;
 	//SessionSearch->MaxSearchResults = 10;
 	//SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
-
+	//
 	//IOnlineSessionPtr Session = OSS->GetSessionInterface();
 	//if (Session.IsValid())
 	//{
 	//	// 델리게이트 연결
 	//	//OnlineSessionInterface->AddOnFindSessionsCompleteDelegate_Handle(FindSessionComplete);
 	//	Session->OnFindSessionsCompleteDelegates.AddUObject(this, &AFKMenuPlayerController::OnFindSessionsComplete);
-
+	//
 	//	// Find Game Session
 	//	SessionSearch = MakeShareable(new FOnlineSessionSearch());
 	//	SessionSearch->MaxSearchResults = 100;	// 검색 결과로 나오는 세션 수 최대값
 	//	SessionSearch->bIsLanQuery = false;		// LAN 사용 여부
 	//	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals); // 찾을 세션 쿼리를 Presence로 설정
-
+	//
 	//	// 세션 검색
 	//	if (const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController())
 	//		Session->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), SessionSearch.ToSharedRef());

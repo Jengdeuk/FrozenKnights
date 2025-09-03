@@ -3,19 +3,19 @@
 
 AFKMonsterPoolManager::AFKMonsterPoolManager()
 {
-	SpawnSlots.Add({ ENPCType::Warchief, FVector(-1190, 2050, -404), FRotator(0, 90, 0), FTimerHandle()});
-	SpawnSlots.Add({ ENPCType::Qilin, FVector(-1920, 1700, -404), FRotator(0, 90, 0), FTimerHandle() });
-	SpawnSlots.Add({ ENPCType::Qilin, FVector(-420, 1710, -404), FRotator(0, 90, 0), FTimerHandle() });
+	SpawnSlots.Emplace(ENPCType::Warchief, FVector(-1190, 2050, -404), FRotator(0, 90, 0));
+	SpawnSlots.Emplace(ENPCType::Qilin, FVector(-1920, 1700, -404), FRotator(0, 90, 0));
+	SpawnSlots.Emplace(ENPCType::Qilin, FVector(-420, 1710, -404), FRotator(0, 90, 0));
 
-	SpawnSlots.Add({ ENPCType::Qilin, FVector(-1200, 1020, -305), FRotator(0, 90, 0), FTimerHandle() });
-	SpawnSlots.Add({ ENPCType::BeetleRed, FVector(-2140, 10, -116), FRotator(0, 180, 0), FTimerHandle() });
-	SpawnSlots.Add({ ENPCType::BeetleRed,FVector(-530, 20, -74), FRotator(0, 0, 0), FTimerHandle() });
+	SpawnSlots.Emplace(ENPCType::Qilin, FVector(-1200, 1020, -305), FRotator(0, 90, 0));
+	SpawnSlots.Emplace(ENPCType::BeetleRed, FVector(-2140, 10, -116), FRotator(0, 180, 0));
+	SpawnSlots.Emplace(ENPCType::BeetleRed,FVector(-530, 20, -74), FRotator(0, 0, 0));
 
-	SpawnSlots.Add({ ENPCType::Warchief, FVector(830, 3140, -427), FRotator(0, 180, 0), FTimerHandle() });
-	SpawnSlots.Add({ ENPCType::Warchief, FVector(820, 4830, -437), FRotator(0, 180, 0), FTimerHandle() });
+	SpawnSlots.Emplace(ENPCType::Warchief, FVector(830, 3140, -427), FRotator(0, 180, 0));
+	SpawnSlots.Emplace(ENPCType::Warchief, FVector(820, 4830, -437), FRotator(0, 180, 0));
 
-	SpawnSlots.Add({ ENPCType::Qilin, FVector(2100, 4320, -647), FRotator(0, 180, 0), FTimerHandle() });
-	SpawnSlots.Add({ ENPCType::BeetleRed, FVector(2560, 4040, -647), FRotator(0, 0, 0), FTimerHandle() });
+	SpawnSlots.Emplace(ENPCType::Qilin, FVector(2100, 4320, -647), FRotator(0, 180, 0));
+	SpawnSlots.Emplace(ENPCType::BeetleRed, FVector(2560, 4040, -647), FRotator(0, 0, 0));
 }
 
 void AFKMonsterPoolManager::InitPool(UClass* InMonsterClass, int32 Size)

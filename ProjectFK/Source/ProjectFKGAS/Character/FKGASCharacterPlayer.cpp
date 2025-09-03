@@ -185,17 +185,20 @@ void AFKGASCharacterPlayer::SetGAS()
 			CurrentAttributeSet->OnRepSpeedChanged.AddDynamic(this, &ThisClass::OnRepSpeedChanged);
 		}
 
-		for (const auto& StartAbility : StartAbilities)
+		if (HasAuthority())
 		{
-			FGameplayAbilitySpec StartSpec(StartAbility);
-			ASC->GiveAbility(StartSpec);
-		}
+			for (const auto& StartAbility : StartAbilities)
+			{
+				FGameplayAbilitySpec StartSpec(StartAbility);
+				ASC->GiveAbility(StartSpec);
+			}
 
-		for (const auto& StartInputAbility : StartInputAbilities)
-		{
-			FGameplayAbilitySpec StartSpec(StartInputAbility.Value);
-			StartSpec.InputID = StartInputAbility.Key;
-			ASC->GiveAbility(StartSpec);
+			for (const auto& StartInputAbility : StartInputAbilities)
+			{
+				FGameplayAbilitySpec StartSpec(StartInputAbility.Value);
+				StartSpec.InputID = StartInputAbility.Key;
+				ASC->GiveAbility(StartSpec);
+			}
 		}
 
 		SetupGASInputComponent();

@@ -72,7 +72,8 @@ AFKCharacterPlayer::AFKCharacterPlayer()
 
 	// Helm Component
 	Helm = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Helm"));
-	Helm->SetupAttachment(GetMesh(), TEXT("head"));
+	//Helm->SetupAttachment(GetMesh(), TEXT("head"));
+
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> HelmMeshRef(TEXT("/Script/Engine.StaticMesh'/Game/ParagonGreystone/Characters/Heroes/Greystone/Skins/WhiteTiger/Meshes/SM_Greystone_TigerHelm.SM_Greystone_TigerHelm'"));
 	if (HelmMeshRef.Object)
 	{
@@ -376,6 +377,7 @@ void AFKCharacterPlayer::OnBindResourcesCompleted()
 
 void AFKCharacterPlayer::EquipHelm()
 {
+	Helm->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("head"));
 	Helm->SetStaticMesh(HelmMesh);
 	Helm->SetRelativeRotation(FRotator(-90.0f, 0.0f, 0.0f));
 }

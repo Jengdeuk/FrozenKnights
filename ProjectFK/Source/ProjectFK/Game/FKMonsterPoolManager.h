@@ -4,9 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Character/FKCharacterNonPlayer.h"
 #include "FKMonsterPoolManager.generated.h"
-
-enum class ENPCType : uint8;
 
 USTRUCT()
 struct FSpawnSlot
@@ -24,6 +23,20 @@ struct FSpawnSlot
 
 	UPROPERTY()
 	FTimerHandle SpawnTimerHandle;
+
+	FSpawnSlot()
+		: MobType(ENPCType::Warchief)
+		, SpawnLocation(FVector::ZeroVector)
+		, SpawnRotation(FRotator::ZeroRotator)
+	{
+	}
+
+	FSpawnSlot(ENPCType _MobType, FVector _SpawnLocation, FRotator _SpawnRotation)
+		: MobType(_MobType)
+		, SpawnLocation(_SpawnLocation)
+		, SpawnRotation(_SpawnRotation)
+	{
+	}
 };
 
 UCLASS()
