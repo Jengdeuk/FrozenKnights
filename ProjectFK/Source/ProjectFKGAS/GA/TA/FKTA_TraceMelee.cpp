@@ -56,15 +56,7 @@ FGameplayAbilityTargetDataHandle AFKTA_TraceMelee::MakeTargetData() const
 	const FVector Start = Character->GetActorLocation() + Forward * Character->GetCapsuleComponent()->GetScaledCapsuleRadius();
 	const FVector End = Start + Forward * AttackRange;
 
-	ECollisionChannel ColChannel;
-	if (CastChecked<AFKCharacterBase>(Character)->IsPlayerCharacter())
-	{
-		ColChannel = CCHANNEL_FKACTION;
-	}
-	else
-	{
-		ColChannel = CCHANNEL_FKMOBATTACK;
-	}
+	ECollisionChannel ColChannel = CCHANNEL_FKACTION;
 	bool HitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ColChannel, FCollisionShape::MakeSphere(AttackRadius), Params);
 
 	FGameplayAbilityTargetDataHandle DataHandle;

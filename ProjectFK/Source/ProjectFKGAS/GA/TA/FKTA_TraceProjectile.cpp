@@ -5,7 +5,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "Physics/FKCollision.h"
-#include "Character/FKCharacterBase.h"
+#include "Character/FKCharacterPlayer.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
@@ -83,11 +83,14 @@ void AFKTA_TraceProjectile::StartTargeting(UGameplayAbility* Ability)
 {
     Super::StartTargeting(Ability);
 
-    ACharacter* Character = CastChecked<ACharacter>(SourceActor);
-    const FVector Forward = Character->GetActorForwardVector();
-    const FVector Start = Character->GetActorLocation() + Forward * 2.f * Character->GetCapsuleComponent()->GetScaledCapsuleRadius();
+    AFKCharacterPlayer* Character = CastChecked<AFKCharacterPlayer>(SourceActor);
 
-    SetActorLocation(Start + FVector(0, 0, 40));
+    const FVector Forward = Character->GetActorForwardVector();
+    const FVector MuzzleLocation = Character->GetActorLocation() + Forward * 2.f * Character->GetCapsuleComponent()->GetScaledCapsuleRadius() + FVector(0, 0, 40);
+    const FVector TargetLocation = Character->GetAimPoint();
+    const FVector FireDirection = (TargetLocation - MuzzleLocation).GetSafeNormal();
+
+    SetActorLocation(MuzzleLocation);
 
     FXActor = GetWorld()->SpawnActorDeferred<AFKFXActor_Projectile>(
         AFKFXActor_Projectile::StaticClass(),
@@ -103,7 +106,7 @@ void AFKTA_TraceProjectile::StartTargeting(UGameplayAbility* Ability)
     }
 
     CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-    ProjectileMovement->Velocity = Forward * ProjectileMovement->InitialSpeed;
+    ProjectileMovement->Velocity = FireDirection * ProjectileMovement->InitialSpeed;
     ProjectileMovement->Activate();
 
     GetWorld()->GetTimerManager().SetTimer(ConfirmTimerHandle, this, &ThisClass::OnTimerFinished, 5.0f, false);
@@ -130,7 +133,7 @@ void AFKTA_TraceProjectile::ConfirmTargetingAndContinue()
 
 void AFKTA_TraceProjectile::OnProjectileOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-    if (bHasConfirmed || OtherActor->IsA<AFKCharacterBase>() == false || OtherActor == SourceActor || Cast<AFKCharacterBase>(OtherActor)->IsPlayerCharacter())
+    if (bHasConfirmed || OtherActor->IsA<AFKCharacterBase>() == false || OtherActor == SourceActor)
     {
         return;
     }
@@ -141,7 +144,7 @@ void AFKTA_TraceProjectile::OnProjectileOverlap(UPrimitiveComponent* OverlappedC
         FGameplayAbilityTargetData_SingleTargetHit* TargetData = new FGameplayAbilityTargetData_SingleTargetHit(SweepResult);
         DataHandle.Add(TargetData);
     }
-    else
+    else // 오너와 상대가 너무 가까워서 HitResultData가 명확하지 않을 때 액터로 넘겨준다.
     {
         TArray<TWeakObjectPtr<AActor>> HitActors;
         HitActors.Add(OtherActor);
@@ -172,6 +175,7 @@ void AFKTA_TraceProjectile::OnProjectileHitWall(UPrimitiveComponent* HitComp, AA
     // 이펙트 소환
     FGameplayEffectContextHandle CueContextHandle = ASC->MakeEffectContext();
     CueContextHandle.AddHitResult(Hit);
+
     FGameplayCueParameters CueParam;
     CueParam.EffectContext = CueContextHandle;
     ASC->ExecuteGameplayCue(GAMEPLAYCUE_CHARACTER_ATTACKHIT_MAGE, CueParam);

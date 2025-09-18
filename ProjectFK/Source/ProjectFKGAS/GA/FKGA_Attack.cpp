@@ -34,7 +34,13 @@ void UFKGA_Attack::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 
 	if (bPlayerCharacter)
 	{
-		CastChecked<AFKCharacterPlayer>(FKCharacter)->ServerRPCPlayAttackMontage();
+		AFKCharacterPlayer* FKPlayer = CastChecked<AFKCharacterPlayer>(ActorInfo->AvatarActor.Get());
+
+		FKPlayer->ServerRPCPlayAttackMontage();
+		if (FKPlayer->IsLocallyControlled())
+		{
+			FKPlayer->CalculateClientAimPoint();
+		}
 	}
 
 	StartComboTimer();
@@ -124,6 +130,10 @@ void UFKGA_Attack::CheckComboInput()
 			if (FKCharacter)
 			{
 				FKCharacter->ServerRPCMontageJumpToSection(NextSectionName);
+				if (FKCharacter->IsLocallyControlled())
+				{
+					FKCharacter->CalculateClientAimPoint();
+				}
 			}
 		}
 

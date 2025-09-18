@@ -249,6 +249,43 @@ void AFKCharacterPlayer::SummonCastMageEffect()
 {
 }
 
+bool AFKCharacterPlayer::ServerRPCSetAimPoint_Validate(FVector Point)
+{
+	return true;
+}
+
+void AFKCharacterPlayer::ServerRPCSetAimPoint_Implementation(FVector Point)
+{
+	SetAimPoint(Point);
+}
+
+void AFKCharacterPlayer::CalculateClientAimPoint()
+{
+	if (IsLocallyControlled())
+	{
+		FVector CameraLocation;
+		FRotator CameraRotation;
+		GetController()->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+		FVector TraceStart = CameraLocation;
+		FVector TraceEnd = TraceStart + CameraRotation.Vector() * 10000.f;
+
+		FHitResult HitResult;
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+
+		GetWorld()->LineTraceSingleByChannel(
+			HitResult,
+			TraceStart,
+			TraceEnd,
+			ECC_Visibility,
+			Params
+		);
+
+		ServerRPCSetAimPoint(HitResult.bBlockingHit ? HitResult.ImpactPoint : TraceEnd);
+	}
+}
+
 void AFKCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterControlType)
 {
 	if (!IsLocallyControlled())

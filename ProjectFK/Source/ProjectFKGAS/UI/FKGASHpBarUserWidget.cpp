@@ -19,8 +19,7 @@ void UFKGASHpBarUserWidget::SetAbilitySystemComponent(AActor* InOwner)
 		ASC->GetGameplayAttributeValueChangeDelegate(UFKCharacterAttributeSet::GetMaxHealthAttribute()).AddUObject(this, &UFKGASHpBarUserWidget::OnMaxHealthChanged);
 		ASC->RegisterGameplayTagEvent(FKTAG_CHARACTER_ISINVINSIBLE, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &UFKGASHpBarUserWidget::OnInvinsibleTagChanged);
 		
-		AFKCharacterBase* OwnerCharacter = Cast<AFKCharacterBase>(InOwner);
-		PbHpBar->SetFillColorAndOpacity(OwnerCharacter->IsLocallyControlled() == false && OwnerCharacter->IsPlayerCharacter() ? OtherPlayerHealthColor : HealthColor);
+		PbHpBar->SetFillColorAndOpacity(HealthColor);
 
 		const UFKCharacterAttributeSet* CurrentAttributeSet = ASC->GetSet<UFKCharacterAttributeSet>();
 		if (CurrentAttributeSet)

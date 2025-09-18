@@ -48,15 +48,29 @@ void UFKGA_AttackHitCheck::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 
 void UFKGA_AttackHitCheck::OnTraceResultCallback(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
 {
+	UAbilitySystemComponent* SourceASC = GetAbilitySystemComponentFromActorInfo_Checked();
+	AFKCharacterBase* SourceCharacter = Cast<AFKCharacterBase>(SourceASC->GetAvatarActor());
+	if (!SourceASC || !SourceCharacter)
+	{
+		return;
+	}
+
+	bool bIsMonster = (SourceCharacter->IsPlayerCharacter() == false);
+
 	for (int32 i = 0; i < TargetDataHandle.Num(); ++i)
 	{
 		if (UAbilitySystemBlueprintLibrary::TargetDataHasHitResult(TargetDataHandle, i))
 		{
 			FHitResult HitResult = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetDataHandle, 0);
 
-			UAbilitySystemComponent* SourceASC = GetAbilitySystemComponentFromActorInfo_Checked();
 			UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(HitResult.GetActor());
-			if (!SourceASC || !TargetASC)
+			if (!TargetASC)
+			{
+				return;
+			}
+
+			AFKCharacterBase* TargetCharacter = Cast<AFKCharacterBase>(HitResult.GetActor());
+			if (bIsMonster && TargetCharacter->IsPlayerCharacter() == false)
 			{
 				return;
 			}
@@ -68,44 +82,9 @@ void UFKGA_AttackHitCheck::OnTraceResultCallback(const FGameplayAbilityTargetDat
 				ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle, TargetDataHandle);
 
 				// 피격 이펙트 소환
-				AFKCharacterBase* Character = Cast<AFKCharacterBase>(HitResult.GetActor());
-				if (Character && Character->IsPlayerCharacter() == false)
-				{
-					FGameplayEffectContextHandle CueContextHandle = UAbilitySystemBlueprintLibrary::GetEffectContext(EffectSpecHandle);
-					CueContextHandle.AddHitResult(HitResult);
-					FGameplayCueParameters CueParam;
-					CueParam.EffectContext = CueContextHandle;
-
-					FGameplayTag Tag;
-					if (AFKGASPlayerState* GASPS = Cast<AFKGASPlayerState>(SourceASC->GetOwnerActor()))
-					{
-						switch (GASPS->GetPlayerClass())
-						{
-						case EPlayerClass::Knight:
-							Tag = GAMEPLAYCUE_CHARACTER_ATTACKHIT_KNIGHT;
-							break;
-						case EPlayerClass::Mage:
-							Tag = GAMEPLAYCUE_CHARACTER_ATTACKHIT_MAGE;
-							break;
-						}
-					}
-					TargetASC->ExecuteGameplayCue(Tag, CueParam);
-				}
-			}
-		}
-		else if (UAbilitySystemBlueprintLibrary::TargetDataHasActor(TargetDataHandle, i))
-		{
-			UAbilitySystemComponent* SourceASC = GetAbilitySystemComponentFromActorInfo_Checked();
-
-			FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(AttackDamageEffect, CurrentLevel);
-			if (EffectSpecHandle.IsValid())
-			{
-				// 대미지 주기
-				ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle, TargetDataHandle);
-
-				// 피격 이펙트 소환
 				FGameplayEffectContextHandle CueContextHandle = UAbilitySystemBlueprintLibrary::GetEffectContext(EffectSpecHandle);
-				CueContextHandle.AddActors(TargetDataHandle.Data[i].Get()->GetActors(), false);
+				CueContextHandle.AddHitResult(HitResult);
+
 				FGameplayCueParameters CueParam;
 				CueParam.EffectContext = CueContextHandle;
 
@@ -122,6 +101,39 @@ void UFKGA_AttackHitCheck::OnTraceResultCallback(const FGameplayAbilityTargetDat
 						break;
 					}
 				}
+
+				TargetASC->ExecuteGameplayCue(Tag, CueParam);
+			}
+		}
+		else if (UAbilitySystemBlueprintLibrary::TargetDataHasActor(TargetDataHandle, i))
+		{
+			FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(AttackDamageEffect, CurrentLevel);
+			if (EffectSpecHandle.IsValid())
+			{
+				// 대미지 주기
+				ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle, TargetDataHandle);
+
+				// 피격 이펙트 소환
+				FGameplayEffectContextHandle CueContextHandle = UAbilitySystemBlueprintLibrary::GetEffectContext(EffectSpecHandle);
+				CueContextHandle.AddActors(TargetDataHandle.Data[i].Get()->GetActors(), false);
+
+				FGameplayCueParameters CueParam;
+				CueParam.EffectContext = CueContextHandle;
+
+				FGameplayTag Tag;
+				if (AFKGASPlayerState* GASPS = Cast<AFKGASPlayerState>(SourceASC->GetOwnerActor()))
+				{
+					switch (GASPS->GetPlayerClass())
+					{
+					case EPlayerClass::Knight:
+						Tag = GAMEPLAYCUE_CHARACTER_ATTACKHIT_KNIGHT;
+						break;
+					case EPlayerClass::Mage:
+						Tag = GAMEPLAYCUE_CHARACTER_ATTACKHIT_MAGE;
+						break;
+					}
+				}
+
 				SourceASC->ExecuteGameplayCue(Tag, CueParam);
 			}
 		}

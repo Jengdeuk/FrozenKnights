@@ -45,6 +45,18 @@ public:
 
 	virtual void SummonCastMageEffect();
 
+public:
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPCSetAimPoint(FVector Direction);
+
+	void SetAimPoint(FVector Point) { AimPoint = Point; }
+	FVector GetAimPoint() { return AimPoint; }
+
+	void CalculateClientAimPoint();
+
+private:
+	FVector AimPoint;
+
 // Character Control Section
 protected:
 	void SetCharacterControl(ECharacterControlType NewCharacterControlType);
