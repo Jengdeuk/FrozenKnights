@@ -61,7 +61,7 @@ void UFKGA_AttackHitCheck::OnTraceResultCallback(const FGameplayAbilityTargetDat
 	{
 		if (UAbilitySystemBlueprintLibrary::TargetDataHasHitResult(TargetDataHandle, i))
 		{
-			FHitResult HitResult = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetDataHandle, 0);
+			FHitResult HitResult = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetDataHandle, i);
 
 			UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(HitResult.GetActor());
 			if (!TargetASC)
@@ -75,11 +75,15 @@ void UFKGA_AttackHitCheck::OnTraceResultCallback(const FGameplayAbilityTargetDat
 				return;
 			}
 
+			FGameplayAbilityTargetDataHandle TempTargetDataHandle;
+			FGameplayAbilityTargetData_SingleTargetHit* SingleHitData = new FGameplayAbilityTargetData_SingleTargetHit(HitResult);
+			TempTargetDataHandle.Add(SingleHitData);
+
 			FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(AttackDamageEffect, CurrentLevel);
 			if (EffectSpecHandle.IsValid())
 			{
 				// 대미지 주기
-				ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle, TargetDataHandle);
+				ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle, TempTargetDataHandle);
 
 				// 피격 이펙트 소환
 				FGameplayEffectContextHandle CueContextHandle = UAbilitySystemBlueprintLibrary::GetEffectContext(EffectSpecHandle);

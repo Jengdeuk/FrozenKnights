@@ -9,7 +9,7 @@
 #include "Components/CapsuleComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Attribute/FKCharacterAttributeSet.h"
-#include "Character/FKCharacterBase.h"
+#include "Character/FKCharacterPlayer.h"
 
 AFKTA_TraceMelee::AFKTA_TraceMelee()
 {
@@ -54,7 +54,13 @@ FGameplayAbilityTargetDataHandle AFKTA_TraceMelee::MakeTargetData() const
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(UFKTA_Trace), false, Character);
 	const FVector Forward = Character->GetActorForwardVector();
 	const FVector Start = Character->GetActorLocation() + Forward * Character->GetCapsuleComponent()->GetScaledCapsuleRadius();
-	const FVector End = Start + Forward * AttackRange;
+
+	FVector FireDirection = Forward;
+	if (Cast<AFKCharacterBase>(Character)->IsPlayerCharacter())
+	{
+		FireDirection = (Cast<AFKCharacterPlayer>(Character)->GetAimPoint() - Start).GetSafeNormal();
+	}
+	const FVector End = Start + FireDirection * AttackRange;
 
 	ECollisionChannel ColChannel = CCHANNEL_FKACTION;
 	bool HitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ColChannel, FCollisionShape::MakeSphere(AttackRadius), Params);
